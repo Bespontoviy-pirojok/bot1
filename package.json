@@ -1,0 +1,27 @@
+{
+  "name": "telegram-evaluating-designs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "go": "nodemon index.js --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/interferstd/telegram-evaluating-designs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/interferstd/telegram-evaluating-designs/issues"
+  },
+  "homepage": "https://github.com/interferstd/telegram-evaluating-designs#readme",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.10.0",
+    "telegraf": "^3.38.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
