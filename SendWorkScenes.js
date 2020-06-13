@@ -9,12 +9,13 @@ const telegram = new Telegram(config.token);
 class SendWorkScenes {
   PhotoUploadScene() {
     const photoUpload = new Scene("photoUpload");
-    photoUpload.enter(async ctx => {
+    photoUpload.enter(async (ctx) => {
       await ctx.reply(
         "Отправьте фотографии в формате jpeg или png. Первая фотография будет использоваться в качестве превью к вашей работе"
       );
     });
-    photoUpload.on("photo", async ctx => {
+    //TODO: ю блять ноу что тут надобно альбомы обрабатывать? и что насчёт сраных описаний?
+    photoUpload.on("photo", async (ctx) => {
       const imageData = await bot.telegram.getFile(
         ctx.message.photo[ctx.message.photo.length - 1].file_id
       );
@@ -26,4 +27,4 @@ class SendWorkScenes {
   }
 }
 
-module.exports = sendWorkScenes;
+module.exports = SendWorkScenes;

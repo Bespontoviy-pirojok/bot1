@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "go": "nodemon index.js --watch",
+    "lint": "eslint --ext .js --ignore-path .gitignore .",
+    "fix": "eslint --fix --ext .js --ignore-path .gitignore .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,7 +20,11 @@
   },
   "homepage": "https://github.com/interferstd/telegram-evaluating-designs#readme",
   "dependencies": {
+    "eslint": "^7.2.0",
+    "eslinter": "^3.2.1",
     "node-telegram-bot-api": "^0.10.0",
+    "prettier": "^2.0.5",
+    "socks5-https-client": "^1.2.1",
     "telegraf": "^3.38.0"
   },
   "devDependencies": {
