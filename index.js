@@ -6,44 +6,57 @@ const config = require('./congif.json')
 const Telegraf = require('telegraf')
 const Extra = require('telegraf/extra')
 const Markup = require('telegraf/markup')
+const Stage = require('telegraf/stage')
+const Session = require('telegraf/session')
 
 const bot = new Telegraf(config.token)
+bot.use(Telegraf.log())
 
-// bot.use(Telegraf.log())
+//  Сохраненное
+const Store = require('./StoreScenes')
+const store = new Store
+const StoreScene = store.StoreScene()
 
-bot.start((ctx) => {
-  ctx.reply('С помощью этого бота можно оценивать работы дизайнеров 😎😎😎', Markup
+// Обработка сцен
+const stage = new Stage([StoreScene])
+
+bot.use(Session())
+bot.use(stage.middleware())
+
+
+
+bot.start((ctx => ctx.reply('Бот для всей хуйни', Markup
     .keyboard([
-      'Выложить работу',
-      'Поставить оценку',
-      'Мои оценки',
-      'Сохранённое'])
+        'Посмотреть оценки своих работ',
+        'Сохраненное',
+        'Выложить работу',
+        'Поставить оценку',
+    ])
     .resize()
     .oneTime()
-    .extra())
+    .extra()
+)))
+
+
+bot.on('text', ctx => {
+    switch (ctx.message.text) {
+        case 'Посмотреть оценки своих работ':
+            //TODO обработать
+            ctx.reply('ПОШЁЛ НАХУЙ СО СВОИМИ ОЦЕНКАМИ И РАБОТАМИ')
+            break;
+        case 'Сохраненное':
+            ctx.scene.enter('StoreScene')
+            break;
+        case 'Выложить работу':
+            //TODO обработать
+            ctx.reply('ПОШЁЛ НАХУЙ СО СВОИМИ РАБОТАМИ')
+            break;
+        case 'Поставить оценку':
+            //TODO обработать
+            ctx.reply('ПОШЁЛ НАХУЙ СО СВОИМИ ОЦЕНКАМИ')
+            break;
+    }
 })
 
-bot.hears('Выложить работу', (ctx) => {
-  ctx.reply('Отправьте фотографии в формате jpeg или png. Первая фотография будет использоваться в качестве превью к вашей работе');
-})
-
-bot.on('photo', (ctx) => {
-  console.log(ctx.message)
-  return ctx.reply('ПОЛУЧЕНО, СУКА ПОДЗАБОРНАЯ БЛЯДЬ')
-})
-
-
-
-
-bot.hears('Поставить оценку', (ctx) => {
-  ctx.reply('Хуй тебе');
-})
-bot.hears('Мои оценки', (ctx) => {
-  ctx.reply('Хуй тебе');
-})
-bot.hears('Сохранённое', (ctx) => {
-  ctx.reply('Хуй тебе');
-})
-
-////////////////////////////////////////////////////////////////////////////////////////
-
+console.log('Я ЖИВ ЕБАТЬ')
+bot.launch()
