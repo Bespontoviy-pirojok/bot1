@@ -4,21 +4,26 @@
 const config = require('./congif.json')
 
 const Telegraf = require('telegraf')
-const Extra = require('telegraf/extra')
-const Markup = require('telegraf/markup')
-const Stage = require('telegraf/stage')
 const Session = require('telegraf/session')
-
+const { Extra,
+        Markup,
+        Stage,
+    } = Telegraf
 const bot = new Telegraf(config.token)
 bot.use(Telegraf.log())
+
+//  Добавить работу
+const SendWork = require('./SendWorkScenes');
+const sendWork = new SendWork;
+const PhotoUploadScene = sendWork.PhotoUploadScene();
 
 //  Сохраненное
 const Store = require('./StoreScenes')
 const store = new Store
 const StoreScene = store.StoreScene()
 
-// Обработка сцен
-const stage = new Stage([StoreScene])
+//  Обработка сцен
+const stage = new Stage([StoreScene, PhotoUploadScene])
 
 bot.use(Session())
 bot.use(stage.middleware())
@@ -48,8 +53,7 @@ bot.on('text', ctx => {
             ctx.scene.enter('StoreScene')
             break;
         case 'Выложить работу':
-            //TODO обработать
-            ctx.reply('ПОШЁЛ НАХУЙ СО СВОИМИ РАБОТАМИ')
+            ctx.scene.enter('photoUpload');
             break;
         case 'Поставить оценку':
             //TODO обработать
