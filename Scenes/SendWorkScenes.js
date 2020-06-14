@@ -1,5 +1,5 @@
 const Scene = require("telegraf/scenes/base");
-const config = require("./congif.json");
+const config = require("../congif.json");
 const Telegraf = require("telegraf");
 const Telegram = require("telegraf/telegram");
 

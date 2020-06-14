@@ -45,7 +45,6 @@ class StoreScenes {
         break;
       default:
         await ctx.reply("Хуйню не неси");
-        // await ctx.scene.reenter()
       }
     });
     return store;

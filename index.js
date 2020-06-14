@@ -4,7 +4,10 @@
 const config = require("./congif.json");
 
 const SocksAgent = require("socks5-https-client/lib/Agent");
+// Не пофикcилось нихуя
 const socksAgent = undefined // new SocksAgent(config.socks5); //TODO: socks5 (если я правильно понял это вылечит недоступность телеги)
+
+
 
 const Telegraf = require("telegraf");
 const Session = require("telegraf/session");
@@ -17,13 +20,15 @@ const bot = new Telegraf(config.token, {
 bot.use(Telegraf.log());
 
 //TODO: система наименований (пока что анахрхия мать порядка блять, не понятно что есть что)
+//  Конкретнее пжлст
+
 //  Добавить работу
-const SendWork = require("./SendWorkScenes");
+const SendWork = require("./Scenes/SendWorkScenes");
 const sendWork = new SendWork();
 const PhotoUploadScene = sendWork.PhotoUploadScene();
 
 //  Сохраненное
-const Store = require("./StoreScenes");
+const Store = require("./Scenes/StoreScenes");
 const store = new Store();
 const StoreScene = store.StoreScene();
 
@@ -48,6 +53,8 @@ bot.start((ctx) =>
   )
 );
 //TODO: клавиатуру не просто закройте, а замените на подходящую
+//  Конкретнее пжлст
+
 bot.on("text", (ctx) => {
   switch (ctx.message.text) {
   case "Посмотреть оценки своих работ":
