@@ -27,16 +27,22 @@ class SendWorkScenes {
 
     //TODO: сделать кнопку "Загрузить"???
     sendWork.hears("next", (ctx) =>{
-      ctx.scene.enter("AddDescriptionQuestion");
+      if (this.works.photos.length > 1 && this.works.photos.length < 10){
+        ctx.scene.enter("AddDescriptionQuestion");
+      }else{
+        ctx.reply('Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб.');
+        this.works.photos = [];
+        ctx.scene.reenter();
+      }
     });
     // sendWork.on("text", async (ctx) =>{
-    //   console.log(this.works[ctx.from.id].length)
-    //   if (this.works[ctx.from.id].length > 1 && this.works[ctx.from.id].length < 10){
-    //     await ctx.replyWithMediaGroup(this.works[ctx.from.id]);
+    //   console.log(this.works.photos.length)
+    //   if (this.works.photos.length > 1 && this.works.photos.length < 10){
+    //     await ctx.replyWithMediaGroup(this.works.photos);
     //   }else{
     //     await ctx.reply('wtf are you doing?');
     //   }
-    //   this.works[ctx.from.id] = [];
+    //   this.works.photos = [];
     // })
     return sendWork;
   }
