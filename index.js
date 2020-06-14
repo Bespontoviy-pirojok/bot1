@@ -17,7 +17,7 @@ const bot = new Telegraf(config.token, {
     agent: socksAgent,
   },
 });
-bot.use(Telegraf.log());
+//bot.use(Telegraf.log());
 
 //TODO: система наименований (пока что анахрхия мать порядка блять, не понятно что есть что)
 //  Конкретнее пжлст
@@ -25,7 +25,7 @@ bot.use(Telegraf.log());
 //  Добавить работу
 const SendWork = require("./Scenes/SendWorkScenes");
 const sendWork = new SendWork();
-const PhotoUploadScene = sendWork.PhotoUploadScene();
+const SendWorkScene = sendWork.SendWorkScene();
 
 //  Сохраненное
 const Store = require("./Scenes/StoreScenes");
@@ -33,7 +33,7 @@ const store = new Store();
 const StoreScene = store.StoreScene();
 
 //  Обработка сцен
-const stage = new Stage([StoreScene, PhotoUploadScene]);
+const stage = new Stage([StoreScene, SendWorkScene]);
 
 bot.use(Session());
 bot.use(stage.middleware());
@@ -65,7 +65,7 @@ bot.on("text", (ctx) => {
     ctx.scene.enter("StoreScene");
     break;
   case "Выложить работу":
-    ctx.scene.enter("photoUpload");
+    ctx.scene.enter("SendWorkScene");
     break;
   case "Поставить оценку":
     //TODO обработать
