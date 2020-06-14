@@ -3,7 +3,6 @@ const Markup = require("telegraf/markup");
 
 class StoreScenes {
   StoreScene() {
-    const store = new Scene("StoreScene");
     /*
 
     Хуйня снизу работает когда кто-то переходит
@@ -18,6 +17,7 @@ class StoreScenes {
     чтобы я их в функционал въебашил.
 
      */
+    const store = new Scene("StoreScene");
     store.enter(async (ctx) => {
       await ctx.reply(
         "Сцена с хранилищем",
