@@ -5,7 +5,7 @@ const config = require("./congif.json");
 
 const SocksAgent = require("socks5-https-client/lib/Agent");
 // Не пофикcилось нихуя
-const socksAgent = undefined // new SocksAgent(config.socks5); //TODO: socks5 (если я правильно понял это вылечит недоступность телеги)
+const socksAgent = undefined; // new SocksAgent(config.socks5); //TODO: socks5 (если я правильно понял это вылечит недоступность телеги)
 
 
 
@@ -26,6 +26,8 @@ const bot = new Telegraf(config.token, {
 const SendWork = require("./Scenes/SendWorkScenes");
 const sendWork = new SendWork();
 const SendWorkScene = sendWork.SendWorkScene();
+const AddDescriptionQuestionScene = sendWork.AddDescriptionQuestionScene();
+const EnterDescriptionScene = sendWork.EnterDescriptionScene();
 
 //  Сохраненное
 const Store = require("./Scenes/StoreScenes");
@@ -33,7 +35,8 @@ const store = new Store();
 const StoreScene = store.StoreScene();
 
 //  Обработка сцен
-const stage = new Stage([StoreScene, SendWorkScene]);
+const stage = new Stage([StoreScene,
+  SendWorkScene, AddDescriptionQuestionScene, EnterDescriptionScene]);
 
 bot.use(Session());
 bot.use(stage.middleware());
