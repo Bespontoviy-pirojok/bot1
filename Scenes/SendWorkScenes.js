@@ -1,10 +1,4 @@
 const Scene = require("telegraf/scenes/base");
-const config = require("../congif.json");
-const Telegraf = require("telegraf");
-const Telegram = require("telegraf/telegram");
-
-const bot = new Telegraf(config.token);
-const telegram = new Telegram(config.token);
 
 class SendWorkScenes {
   PhotoUploadScene() {
