@@ -18,6 +18,7 @@ class SendWorkScenes {
         "Отправьте фотографии в формате jpeg или png. Первая фотография будет использоваться в качестве превью к вашей работе"
       );
     });
+
     sendWork.on("photo", (ctx) => {
       const originalPhoto = ctx.message.photo.length - 1;
       this.works.id = ctx.from.id;
@@ -27,7 +28,7 @@ class SendWorkScenes {
 
     //TODO: сделать кнопку "Загрузить"???
     sendWork.hears("next", (ctx) =>{
-      if (this.works.photos.length > 1 && this.works.photos.length < 10){
+      if (this.works.photos.length > 0 && this.works.photos.length < 10){
         ctx.scene.enter("AddDescriptionQuestion");
       }else{
         ctx.reply('Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб.');
