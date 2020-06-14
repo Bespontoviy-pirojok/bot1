@@ -1,5 +1,6 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+const main = require('../main')
 
 class SendWorkScenes {
   constructor() {
@@ -34,25 +35,22 @@ class SendWorkScenes {
       });
     });
 
-    //TODO: сделать кнопку "Загрузить"???
-    sendWork.hears("next", (ctx) =>{
-      if (this.works.photos.length > 0 && this.works.photos.length < 10){
-        ctx.scene.enter("AddDescriptionQuestion");
-      }else{
-        ctx.reply('Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб.');
-        this.works.photos = [];
-        ctx.scene.reenter();
+    sendWork.on('text', (ctx)=>{
+      switch (ctx.message.text) {
+        case "Отправить":
+          if (this.works.photos.length > 0 && this.works.photos.length < 10){
+            ctx.scene.enter("AddDescriptionQuestion");
+          }else{
+            ctx.reply('Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб.');
+            this.works.photos = [];
+            ctx.scene.reenter();
+          }
+          break;
+        case "Назад":
+          main(ctx);
+          ctx.scene.leave()
       }
-    });
-    // sendWork.on("text", async (ctx) =>{
-    //   console.log(this.works.photos.length)
-    //   if (this.works.photos.length > 1 && this.works.photos.length < 10){
-    //     await ctx.replyWithMediaGroup(this.works.photos);
-    //   }else{
-    //     await ctx.reply('wtf are you doing?');
-    //   }
-    //   this.works.photos = [];
-    // })
+    })
     return sendWork;
   }
   AddDescriptionQuestionScene() {
@@ -79,6 +77,7 @@ class SendWorkScenes {
         this.works.description = null;
         //TODO: оправляем объект this.works в БД
         ctx.reply("Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\"");
+        main(ctx);
         ctx.scene.leave();
         break;
       case "Назад":
@@ -100,6 +99,7 @@ class SendWorkScenes {
         "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\""
       );
       //TODO: оправляем объект this.works в БД
+      main(ctx);
       ctx.scene.leave();
     });
     return description;

@@ -1,5 +1,6 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+const main = require('../main')
 
 class StoreScenes {
   StoreScene() {
@@ -55,6 +56,7 @@ class StoreScenes {
             .oneTime()
             .extra()
         );
+        await main(ctx);
         await ctx.scene.leave();
         break;
       default:
