@@ -17,10 +17,10 @@ class SendWorkScenes {
       await ctx.reply(
         "Отправьте фотографии в формате jpeg или png. Первая фотография " +
           "будет использоваться в качестве превью к вашей работе", Markup
-              .keyboard(['Отправить', 'Назад'])
-              .oneTime()
-              .resize()
-              .extra()
+          .keyboard(["Отправить", "Назад"])
+          .oneTime()
+          .resize()
+          .extra()
       );
     });
     sendWork.on("photo", (ctx) => {
