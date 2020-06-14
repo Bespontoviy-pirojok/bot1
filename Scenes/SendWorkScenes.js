@@ -1,103 +1,115 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
 const main = require("../main");
+const DataBase = require("../DataBase");
 
 class SendWorkScenes {
   constructor() {
-    //объект работы
-    this.works = {
-      id: null, // это ID пользователя, отправившего изображение
-      description: null, // описание работы
-      photos: [], // массив объектов фотографий с полями type : 'photo' и media: file_id. С помощью этих полей будем отдавать фото при необходимости.
+    //init scenes
+    this.scenes = {
+      SendWork: new Scene("SendWork"),
+      DescriptionQuestion: new Scene("DescriptionQuestion"),
+      EnterDescription: new Scene("EnterDescription"),
     };
-  }
-  SendWorkScene() {
-    const sendWork = new Scene("SendWorkScene");
-    sendWork.enter(async (ctx) => {
+
+    //works
+    this.work = new Map();
+
+    this.scenes.SendWork.enter(async (ctx) => {
       // обнуляем массив фото
       await ctx.reply(
         "Отправьте фотографии в формате jpeg или png. Первая фотография " +
           "будет использоваться в качестве превью к вашей работе",
         Markup.keyboard(["Отправить", "Назад"]).oneTime().resize().extra()
       );
+      //объект работы
+      this.work[ctx.from.id] = {
+        _id: null, // ID поста
+        authId: null, // это ID пользователя, отправившего изображение
+        description: null, // описание работы
+        photos: [], // массив ссылок на фотографии
+      };
     });
 
-    sendWork.on("photo", (ctx) => {
+    this.scenes.SendWork.on("photo", (ctx) => {
       const originalPhoto = ctx.message.photo.length - 1;
-      this.works.id = ctx.from.id;
-      this.works.photos = this.works.photos || [];
-      this.works.photos.push({
-        type: "photo",
-        media: ctx.message.photo[originalPhoto].file_id,
-      });
+      this.work[ctx.from.id].authId = ctx.from.id;
+      this.work[ctx.from.id].photos = this.work[ctx.from.id].photos || [];
+      this.work[ctx.from.id].photos.push(
+        ctx.message.photo[originalPhoto].file_id
+      );
     });
 
-    sendWork.on("text", (ctx) => {
+    this.scenes.SendWork.on("text", (ctx) => {
       switch (ctx.message.text) {
       case "Отправить":
-        if (this.works.photos.length > 0 && this.works.photos.length < 10) {
-          ctx.scene.enter("AddDescriptionQuestion");
+        if (
+          this.work[ctx.from.id].photos.length > 0 &&
+            this.work[ctx.from.id].photos.length < 10
+        ) {
+          ctx.scene.enter("DescriptionQuestion");
         } else {
           ctx.reply(
             "Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб."
           );
-          this.works.photos = [];
+          this.work[ctx.from.id].photos = [];
           ctx.scene.reenter();
         }
         break;
       case "Назад":
-        main(ctx);
+        this.work[ctx.from.id] = undefined;
         ctx.scene.leave();
+        main(ctx);
       }
     });
-    return sendWork;
-  }
-  AddDescriptionQuestionScene() {
-    const dQuestion = new Scene("AddDescriptionQuestion");
-    dQuestion.enter(async (ctx) => {
+
+    this.scenes.DescriptionQuestion.enter(async (ctx) => {
       await ctx.reply(
         "Добавить описание?",
         Markup.keyboard(["Да", "Нет", "Назад"]).resize().oneTime().extra()
       );
     });
-    dQuestion.on("text", (ctx) => {
+
+    this.scenes.DescriptionQuestion.on("text", (ctx) => {
       switch (ctx.message.text) {
       case "Да":
-        ctx.scene.enter("EnterDescriptionScene");
+        ctx.scene.enter("EnterDescription");
         break;
       case "Нет":
-        this.works.description = null;
-        //TODO: оправляем объект this.works в БД
-        ctx.reply(
-          "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\""
-        );
-        main(ctx);
-        ctx.scene.leave();
+        this.work[ctx.from.id].description = null;
+        this.sendWork(ctx);
         break;
       case "Назад":
-        ctx.scene.enter("SendWorkScene");
+        ctx.scene.enter("SendWork");
+        this.work[ctx.from.id] = undefined;
         break;
       }
     });
-    return dQuestion;
-  }
 
-  EnterDescriptionScene() {
-    const description = new Scene("EnterDescriptionScene");
-    description.enter((ctx) => {
+    this.scenes.EnterDescription.enter((ctx) => {
       ctx.reply("Введите описание вашей работы");
     });
-    description.on("text", (ctx) => {
-      this.works.description = ctx.message.text;
-      ctx.reply(
-        "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\""
-      );
-      //TODO: оправляем объект this.works в БД
-      main(ctx);
-      ctx.scene.leave();
+    this.scenes.EnterDescription.on("text", (ctx) => {
+      this.work[ctx.from.id].description = ctx.message.text;
+      this.sendWork(ctx);
     });
-    return description;
+  }
+
+  async sendWork(ctx) {
+    await ctx.base.putPost(this.work[ctx.from.id]);
+    await ctx.reply(
+      "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"Мои работы\" Ещё что-нибудь?"
+    );
+    this.work[ctx.from.id] = undefined;
+    await ctx.scene.enter("SendWork");
+  }
+
+  getScene(name) {
+    return this.scenes[name];
+  }
+  getScenes() {
+    return Object.values(this.scenes);
   }
 }
 
-module.exports = SendWorkScenes;
+module.exports = new SendWorkScenes();
