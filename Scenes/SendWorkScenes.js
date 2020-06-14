@@ -17,7 +17,7 @@ class SendWorkScenes {
       await ctx.reply(
         "Отправьте фотографии в формате jpeg или png. Первая фотография " +
           "будет использоваться в качестве превью к вашей работе", Markup
-              .keyboard(['Отправить'])
+              .keyboard(['Отправить', 'Назад'])
               .oneTime()
               .resize()
               .extra()
@@ -36,6 +36,10 @@ class SendWorkScenes {
     sendWork.hears("Отправить", (ctx) =>{
       ctx.scene.enter("AddDescriptionQuestion");
     });
+    sendWork.hears("Назад", (ctx) =>{
+      ctx.scene.leave();
+    });
+
     // sendWork.on("text", async (ctx) =>{
     //   console.log(this.works[ctx.from.id].length)
     //   if (this.works[ctx.from.id].length > 1 && this.works[ctx.from.id].length < 10){
