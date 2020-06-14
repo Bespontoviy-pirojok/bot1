@@ -1,5 +1,6 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+const main = require('../main')
 
 class SendWorkScenes {
   constructor() {
@@ -17,7 +18,7 @@ class SendWorkScenes {
       await ctx.reply(
         "Отправьте фотографии в формате jpeg или png. Первая фотография " +
           "будет использоваться в качестве превью к вашей работе", Markup
-              .keyboard(['Отправить'])
+              .keyboard(['Отправить', 'Назад'])
               .oneTime()
               .resize()
               .extra()
@@ -33,18 +34,16 @@ class SendWorkScenes {
       });
     });
 
-    sendWork.hears("Отправить", (ctx) =>{
-      ctx.scene.enter("AddDescriptionQuestion");
-    });
-    // sendWork.on("text", async (ctx) =>{
-    //   console.log(this.works[ctx.from.id].length)
-    //   if (this.works[ctx.from.id].length > 1 && this.works[ctx.from.id].length < 10){
-    //     await ctx.replyWithMediaGroup(this.works[ctx.from.id]);
-    //   }else{
-    //     await ctx.reply('wtf are you doing?');
-    //   }
-    //   this.works[ctx.from.id] = [];
-    // })
+    sendWork.on('text', (ctx)=>{
+      switch (ctx.message.text) {
+        case "Отправить":
+          ctx.scene.enter("AddDescriptionQuestion");
+          break;
+        case "Назад":
+          main(ctx);
+          ctx.scene.leave()
+      }
+    })
     return sendWork;
   }
   AddDescriptionQuestionScene() {
@@ -71,6 +70,7 @@ class SendWorkScenes {
         this.works.description = null;
         //TODO: оправляем объект this.works в БД
         ctx.reply("Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\"");
+        main(ctx);
         ctx.scene.leave();
         break;
       case "Назад":
@@ -92,6 +92,7 @@ class SendWorkScenes {
         "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\""
       );
       //TODO: оправляем объект this.works в БД
+      main(ctx);
       ctx.scene.leave();
     });
     return description;

@@ -43,20 +43,9 @@ const stage = new Stage([
 bot.use(Session());
 bot.use(stage.middleware());
 
-bot.start((ctx) =>
-  ctx.reply(
-    "Бот для всей хуйни",
-    Markup.keyboard([
-      "Посмотреть оценки своих работ",
-      "Сохраненное",
-      "Выложить работу",
-      "Поставить оценку",
-    ])
-      .resize()
-      .oneTime()
-      .extra()
-  )
-);
+const main = require('./main')
+
+bot.start(main);
 //  TODO: клавиатуру не просто закройте, а замените на подходящую
 //  Конкретнее пжлст
 
