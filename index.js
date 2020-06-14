@@ -3,20 +3,10 @@
 
 const config = require("./congif.json");
 
-const SocksAgent = require("socks5-https-client/lib/Agent");
-const socksAgent = undefined; // new SocksAgent(config.socks5); //TODO: socks5 (если я правильно понял это вылечит недоступность телеги)
-
-const base = require("./DataBase").get(config.mongo);
-
 const Telegraf = require("telegraf");
 const Session = require("telegraf/session");
-const Stage = Telegraf.Stage;
-const bot = new Telegraf(config.token, {
-  telegram: {
-    agent: socksAgent,
-  },
-});
-// bot.use(Telegraf.log());
+const { Markup, Stage } = Telegraf;
+const bot = new Telegraf(config.token);
 
 //  Добавить работу
 const SendWork = require("./Scenes/SendWorkScenes");
@@ -24,16 +14,36 @@ const SendWork = require("./Scenes/SendWorkScenes");
 const Saved = require("./Scenes/SavedScenes");
 
 //  Обработка сцен
-const allScenes = [].concat(Saved.getScenes(), SendWork.getScenes());
-const stage = new Stage(allScenes);
+const stage = new Stage([].concat(Saved.getScenes(), SendWork.getScenes()));
+// Обработка обращений к базе данных
+const base = require("./DataBase").get(config.mongo);
+// Обработка упращённых обращений
+const wrap = require("./Wrapper").get();
+// Главная
+wrap.main = async (ctx) => {
+  ctx.reply(
+    "Бот для всей хуйни",
+    Markup.keyboard([
+      "Посмотреть оценки своих работ",
+      "Сохраненное",
+      "Выложить работу",
+      "Поставить оценку",
+    ])
+      .resize()
+      .oneTime()
+      .extra()
+  );
+};
 
+// Устанавливаем обработчики
 bot.use(Session());
+bot.use(wrap.middleware());
 bot.use(base.middleware());
 bot.use(stage.middleware());
+// bot.use(Telegraf.log());
 
-const main = require("./main");
-
-bot.start(main);
+// Доступные на главной команды
+bot.start(wrap.main);
 bot.on("text", (ctx) => {
   switch (ctx.message.text) {
   case "Посмотреть оценки своих работ":

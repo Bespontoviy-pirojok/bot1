@@ -1,7 +1,7 @@
 class DataBase {
-  constructor() {}
+  constructor(token) {}
   static get(token) {
-    return new DataBase();
+    return new DataBase(token);
   }
   middleware() {
     return (ctx, next) => {
@@ -26,7 +26,7 @@ class DataBase {
     return {
       _id: postId,
       authId: 430830139,
-      description: "Осьминог хули",
+      description: "Осьминог хули id:" + postId,
       photos: [
         "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
         "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",

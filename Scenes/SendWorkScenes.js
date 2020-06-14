@@ -1,7 +1,5 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
-const main = require("../main");
-const DataBase = require("../DataBase");
 
 class SendWorkScenes {
   constructor() {
@@ -31,35 +29,35 @@ class SendWorkScenes {
       };
     });
 
-    this.scenes.SendWork.on("photo", (ctx) => {
+    this.scenes.SendWork.on("photo", async (ctx) => {
       const originalPhoto = ctx.message.photo.length - 1;
-      this.work[ctx.from.id].authId = ctx.from.id;
-      this.work[ctx.from.id].photos = this.work[ctx.from.id].photos || [];
-      this.work[ctx.from.id].photos.push(
-        ctx.message.photo[originalPhoto].file_id
-      );
+      console.log(originalPhoto);
+      const id = ctx.from.id;
+      this.work[id].authId = id;
+      this.work[id].photos = this.work[id].photos || [];
+      this.work[id].photos.push(ctx.message.photo[originalPhoto].file_id);
     });
 
     this.scenes.SendWork.on("text", (ctx) => {
+      const id = ctx.from.id;
       switch (ctx.message.text) {
       case "Отправить":
         if (
-          this.work[ctx.from.id].photos.length > 0 &&
-            this.work[ctx.from.id].photos.length < 10
+          this.work[id].photos.length > 0 &&
+            this.work[id].photos.length < 10
         ) {
           ctx.scene.enter("DescriptionQuestion");
         } else {
           ctx.reply(
             "Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб."
           );
-          this.work[ctx.from.id].photos = [];
+          this.work[id].photos = [];
           ctx.scene.reenter();
         }
         break;
       case "Назад":
-        this.work[ctx.from.id] = undefined;
-        ctx.scene.leave();
-        main(ctx);
+        this.work.delete(id);
+        ctx.wrap.goMain();
       }
     });
 
@@ -81,7 +79,7 @@ class SendWorkScenes {
         break;
       case "Назад":
         ctx.scene.enter("SendWork");
-        this.work[ctx.from.id] = undefined;
+        this.work.delete(ctx.from.id);
         break;
       }
     });
@@ -98,9 +96,9 @@ class SendWorkScenes {
   async sendWork(ctx) {
     await ctx.base.putPost(this.work[ctx.from.id]);
     await ctx.reply(
-      "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"Мои работы\" Ещё что-нибудь?"
+      "Работа успешно добавлена, найти её можно в разделе \"Мои работы\""
     );
-    this.work[ctx.from.id] = undefined;
+    this.work.delete(ctx.from.id);
     await ctx.scene.enter("SendWork");
   }
 

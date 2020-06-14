@@ -1,6 +1,5 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
-const main = require("../main");
 
 class SavedScenes {
   constructor() {
@@ -20,23 +19,25 @@ class SavedScenes {
           .resize()
           .extra()
       );
+      await ctx.reply("Вывелась работа");
     });
 
     this.scenes.Saved.on("text", async (ctx) => {
       switch (ctx.message.text) {
       case "Следующая страцница":
         // Todo ебануть обраточик
-        ctx.reply("Ну тут типо что-то было спереди");
+        await ctx.wrap.deleteLastNMessage(2);
+        await ctx.reply("Ну тут типо что-то было спереди");
         //
         break;
       case "Предыдущая страцница":
         // Todo ебануть обраточик
-        ctx.reply("Ну тут типо что-то было сзади");
+        await ctx.wrap.deleteLastNMessage(2);
+        await ctx.reply("Ну тут типо что-то было сзади");
         //
         break;
       case "Назад":
-        await ctx.scene.leave();
-        await main(ctx);
+        await ctx.wrap.goMain();
         break;
       default:
         await ctx.reply("Хуйню не неси");
