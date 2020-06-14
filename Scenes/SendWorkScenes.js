@@ -7,7 +7,7 @@ class SendWorkScenes {
     this.works = {
       id: null, // это ID пользователя, отправившего изображение
       description: null, // описание работы
-      photos: [] // массив объектов фотографий с полями type : 'photo' и media: file_id. С помощью этих полей будем отдавать фото при необходимости.
+      photos: [], // массив объектов фотографий с полями type : 'photo' и media: file_id. С помощью этих полей будем отдавать фото при необходимости.
     };
   }
   SendWorkScene() {
@@ -22,15 +22,20 @@ class SendWorkScenes {
       const originalPhoto = ctx.message.photo.length - 1;
       this.works.id = ctx.from.id;
       this.works.photos = this.works.photos || [];
-      this.works.photos.push({type: "photo", media: ctx.message.photo[originalPhoto].file_id});
+      this.works.photos.push({
+        type: "photo",
+        media: ctx.message.photo[originalPhoto].file_id,
+      });
     });
 
     //TODO: сделать кнопку "Загрузить"???
-    sendWork.hears("next", (ctx) =>{
-      if (this.works.photos.length > 1 && this.works.photos.length < 10){
+    sendWork.hears("next", (ctx) => {
+      if (this.works.photos.length > 1 && this.works.photos.length < 10) {
         ctx.scene.enter("AddDescriptionQuestion");
-      }else{
-        ctx.reply('Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб.');
+      } else {
+        ctx.reply(
+          "Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб."
+        );
         this.works.photos = [];
         ctx.scene.reenter();
       }
@@ -46,22 +51,15 @@ class SendWorkScenes {
     // })
     return sendWork;
   }
-  AddDescriptionQuestionScene(){
+  AddDescriptionQuestionScene() {
     const dQuestion = new Scene("AddDescriptionQuestion");
     dQuestion.enter(async (ctx) => {
       await ctx.reply(
         "Добавить описание?",
-        Markup.keyboard([
-          "Да",
-          "Нет",
-          "Назад",
-        ]).resize()
-          .oneTime()
-          .extra()
-
+        Markup.keyboard(["Да", "Нет", "Назад"]).resize().oneTime().extra()
       );
     });
-    dQuestion.on("text", (ctx) =>{
+    dQuestion.on("text", (ctx) => {
       switch (ctx.message.text) {
       case "Да":
         ctx.scene.enter("EnterDescriptionScene");
@@ -69,7 +67,9 @@ class SendWorkScenes {
       case "Нет":
         this.works.description = null;
         //TODO: оправляем объект this.works в БД
-        ctx.reply("Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\"");
+        ctx.reply(
+          "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\""
+        );
         ctx.scene.leave();
         break;
       case "Назад":
@@ -80,14 +80,16 @@ class SendWorkScenes {
     return dQuestion;
   }
 
-  EnterDescriptionScene(){
+  EnterDescriptionScene() {
     const description = new Scene("EnterDescriptionScene");
     description.enter((ctx) => {
       ctx.reply("Введите описание вашей работы");
     });
-    description.on("text", (ctx) =>{
+    description.on("text", (ctx) => {
       this.works.description = ctx.message.text;
-      ctx.reply("Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\"");
+      ctx.reply(
+        "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\""
+      );
       //TODO: оправляем объект this.works в БД
       ctx.scene.leave();
     });
