@@ -1,6 +1,6 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
-const main = require('../main')
+const main = require("../main");
 
 class SendWorkScenes {
   constructor() {
@@ -17,11 +17,8 @@ class SendWorkScenes {
       // обнуляем массив фото
       await ctx.reply(
         "Отправьте фотографии в формате jpeg или png. Первая фотография " +
-          "будет использоваться в качестве превью к вашей работе", Markup
-          .keyboard(["Отправить", "Назад"])
-          .oneTime()
-          .resize()
-          .extra()
+          "будет использоваться в качестве превью к вашей работе",
+        Markup.keyboard(["Отправить", "Назад"]).oneTime().resize().extra()
       );
     });
 
@@ -35,22 +32,24 @@ class SendWorkScenes {
       });
     });
 
-    sendWork.on('text', (ctx)=>{
+    sendWork.on("text", (ctx) => {
       switch (ctx.message.text) {
-        case "Отправить":
-          if (this.works.photos.length > 0 && this.works.photos.length < 10){
-            ctx.scene.enter("AddDescriptionQuestion");
-          }else{
-            ctx.reply('Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб.');
-            this.works.photos = [];
-            ctx.scene.reenter();
-          }
-          break;
-        case "Назад":
-          main(ctx);
-          ctx.scene.leave()
+      case "Отправить":
+        if (this.works.photos.length > 0 && this.works.photos.length < 10) {
+          ctx.scene.enter("AddDescriptionQuestion");
+        } else {
+          ctx.reply(
+            "Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб."
+          );
+          this.works.photos = [];
+          ctx.scene.reenter();
+        }
+        break;
+      case "Назад":
+        main(ctx);
+        ctx.scene.leave();
       }
-    })
+    });
     return sendWork;
   }
   AddDescriptionQuestionScene() {
@@ -58,14 +57,7 @@ class SendWorkScenes {
     dQuestion.enter(async (ctx) => {
       await ctx.reply(
         "Добавить описание?",
-        Markup.keyboard([
-          "Да",
-          "Нет",
-          "Назад",
-        ]).resize()
-          .oneTime()
-          .extra()
-
+        Markup.keyboard(["Да", "Нет", "Назад"]).resize().oneTime().extra()
       );
     });
     dQuestion.on("text", (ctx) => {
@@ -76,7 +68,9 @@ class SendWorkScenes {
       case "Нет":
         this.works.description = null;
         //TODO: оправляем объект this.works в БД
-        ctx.reply("Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\"");
+        ctx.reply(
+          "Работа успешно добавлена, вы можете отслеживать ее статистику в разделе \"мои работы\""
+        );
         main(ctx);
         ctx.scene.leave();
         break;

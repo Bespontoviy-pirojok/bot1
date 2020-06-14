@@ -1,6 +1,6 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
-const main = require('../main')
+const main = require("../main");
 
 class StoreScenes {
   StoreScene() {

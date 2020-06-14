@@ -43,7 +43,7 @@ const stage = new Stage([
 bot.use(Session());
 bot.use(stage.middleware());
 
-const main = require('./main')
+const main = require("./main");
 
 bot.start(main);
 //  TODO: клавиатуру не просто закройте, а замените на подходящую
