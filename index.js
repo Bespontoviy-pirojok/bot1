@@ -7,8 +7,6 @@ const SocksAgent = require("socks5-https-client/lib/Agent");
 // Не пофикcилось нихуя
 const socksAgent = undefined; // new SocksAgent(config.socks5); //TODO: socks5 (если я правильно понял это вылечит недоступность телеги)
 
-
-
 const Telegraf = require("telegraf");
 const Session = require("telegraf/session");
 const { Extra, Markup, Stage } = Telegraf;
@@ -19,7 +17,7 @@ const bot = new Telegraf(config.token, {
 });
 //bot.use(Telegraf.log());
 
-//TODO: система наименований (пока что анахрхия мать порядка блять, не понятно что есть что)
+//  TODO: система наименований (пока что анахрхия мать порядка блять, не понятно что есть что)
 //  Конкретнее пжлст
 
 //  Добавить работу
@@ -35,8 +33,12 @@ const store = new Store();
 const StoreScene = store.StoreScene();
 
 //  Обработка сцен
-const stage = new Stage([StoreScene,
-  SendWorkScene, AddDescriptionQuestionScene, EnterDescriptionScene]);
+const stage = new Stage([
+  StoreScene,
+  SendWorkScene,
+  AddDescriptionQuestionScene,
+  EnterDescriptionScene,
+]);
 
 bot.use(Session());
 bot.use(stage.middleware());

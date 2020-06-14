@@ -1,8 +1,8 @@
-const Scene = require("telegraf/scenes/base")
+const Scene = require("telegraf/scenes/base");
 
 class RateWorkScenes {
-    RateWorkScene(){
-        /*
+  RateWorkScene() {
+    /*
 
         Хуйня снизу в очередной раз выводит 10 превьюх работ
         функционал буквально 1 в 1 как у хранилища,
@@ -33,12 +33,12 @@ class RateWorkScenes {
         сообщений повторяются. Но это на твоё усмотрение.
 
          */
-        const rate = new Scene("EvaluationScene")
-        rate.enter(async (ctx)=>{
-            await ctx.reply('ЫЫЫЫЫЫЫЫ')
-        })
-        return evaluation;
-    }
+    const rate = new Scene("EvaluationScene");
+    rate.enter(async (ctx) => {
+      await ctx.reply("ЫЫЫЫЫЫЫЫ");
+    });
+    return evaluation;
+  }
 }
 
 module.exports = RateWorkScenes;
