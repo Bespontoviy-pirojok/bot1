@@ -15,7 +15,12 @@ class SendWorkScenes {
     sendWork.enter(async (ctx) => {
       // обнуляем массив фото
       await ctx.reply(
-        "Отправьте фотографии в формате jpeg или png. Первая фотография будет использоваться в качестве превью к вашей работе"
+        "Отправьте фотографии в формате jpeg или png. Первая фотография " +
+          "будет использоваться в качестве превью к вашей работе", Markup
+              .keyboard(['Отправить'])
+              .oneTime()
+              .resize()
+              .extra()
       );
     });
     sendWork.on("photo", (ctx) => {
@@ -25,8 +30,7 @@ class SendWorkScenes {
       this.works.photos.push({type: "photo", media: ctx.message.photo[originalPhoto].file_id});
     });
 
-    //TODO: сделать кнопку "Загрузить"???
-    sendWork.hears("next", (ctx) =>{
+    sendWork.hears("Отправить", (ctx) =>{
       ctx.scene.enter("AddDescriptionQuestion");
     });
     // sendWork.on("text", async (ctx) =>{
