@@ -36,10 +36,7 @@ wrap.main = async (ctx) => {
 };
 
 // Устанавливаем обработчики
-bot.use(Session());
-bot.use(wrap.middleware());
-bot.use(base.middleware());
-bot.use(stage.middleware());
+bot.use(Session(), wrap.middleware(), base.middleware(), stage.middleware());
 // bot.use(Telegraf.log());
 
 // Доступные на главной команды
