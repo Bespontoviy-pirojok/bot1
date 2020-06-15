@@ -13,7 +13,7 @@ class DataBase {
     console.log("getUser: ", userId);
     return {
       id: userId,
-      saved: ["1", "2", "3"],
+      saved: ["1", "3", "2", "10"], // [],
       posted: ["1", "4"],
       seen: ["2"],
     };
@@ -23,15 +23,24 @@ class DataBase {
   }
   async getPost(postId) {
     console.log("getPost: ", postId);
-    return {
-      _id: postId,
-      authId: 430830139,
-      description: "Осьминог хули id:" + postId,
-      photos: [
-        "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
-        "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
-      ],
-    };
+    return postId !== "3"
+      ? {
+        _id: postId,
+        authId: 430830139,
+        description: "Осьминог хули id:" + postId,
+        photos: [
+          "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
+          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
+        ],
+      }
+      : {
+        _id: postId,
+        authId: 430830139,
+        description: "Осьминог хули id:" + postId,
+        photos: [
+          "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
+        ],
+      };
   }
   async getNewPost(userId) {
     const postId = "типа нью";

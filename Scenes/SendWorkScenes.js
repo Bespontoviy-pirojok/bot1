@@ -10,11 +10,10 @@ class SendWorkScenes {
       EnterDescription: new Scene("EnterDescription"),
     };
 
-    //works
+    // Работы
     this.work = new Map();
 
     this.scenes.SendWork.enter(async (ctx) => {
-      // обнуляем массив фото
       await ctx.reply(
         "Отправьте фотографии в формате jpeg или png. Первая фотография " +
           "будет использоваться в качестве превью к вашей работе",

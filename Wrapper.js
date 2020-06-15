@@ -10,11 +10,37 @@ class Wrapper {
       next();
     };
   }
+  typedAsPhoto(arr) {
+    return arr.map((elem) => {
+      return { type: "photo", media: elem };
+    });
+  }
+  async sendWork(postId) {
+    if (postId === undefined) {
+      this.ctx.reply("Здесь пока ничего нет");
+      return 1;
+    }
+    const post = await this.ctx.base.getPost(postId);
+    let size = post.photos.length;
+    if (post.description !== null) {
+      ++size;
+      await this.ctx.reply(post.description);
+    }
+    this.ctx.telegram.sendMediaGroup(
+      this.ctx.from.id,
+      this.typedAsPhoto(post.photos)
+    );
+    return size;
+  }
+  shiftIndex(index, shift, max) {
+    if (index === -1) return -1;
+    return (index + ((max + shift) % max)) % max;
+  }
   async deleteLastNMessage(n) {
     this.ctx.update.message.message_id -= n;
     while (n) {
       this.ctx.update.message.message_id++;
-      await this.ctx.deleteMessage().catch(console.log);
+      this.ctx.deleteMessage().catch(console.log);
       --n;
     }
   }
