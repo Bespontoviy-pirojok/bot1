@@ -30,7 +30,7 @@ class SendWorkScenes {
 
     this.scenes.SendWork.on("photo", async (ctx) => {
       const originalPhoto = ctx.message.photo.length - 1;
-      console.log(originalPhoto);
+      console.log(ctx.message.photo);
       const id = ctx.from.id;
       this.work[id].authId = id;
       this.work[id].photos = this.work[id].photos || [];

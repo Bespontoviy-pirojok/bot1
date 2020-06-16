@@ -48,10 +48,34 @@ class Wrapper {
       --n;
     }
   }
+
+  //Вот это тоже залупа какая-то, по-моему.. Но лучше не придумал
+  async sendWorksGroup(page){
+    //const posts = await this.ctx.base.getNotSeenPosts();
+    let temp = [
+      { _id: "1", preview: "AgACAgIAAxkBAAIBiF7oooeyKoBnlrMlQUIpde-SBmM8AALArTEbUYdIS4C7ia2r94YGSRwIki4AAwEAAwIAA20AA-SsAgABGgQ" },
+      { _id: "2", preview: "AgACAgIAAxkBAAIBiF7oooeyKoBnlrMlQUIpde-SBmM8AALArTEbUYdIS4C7ia2r94YGSRwIki4AAwEAAwIAA20AA-SsAgABGgQ" },
+      { _id: "3", preview: "AgACAgIAAxkBAAIBiF7oooeyKoBnlrMlQUIpde-SBmM8AALArTEbUYdIS4C7ia2r94YGSRwIki4AAwEAAwIAA20AA-SsAgABGgQ" },
+    ] // Вот такие данные должны идти из getNotSeenPosts
+    const PER_PAGE = 2; // Сколько фоток выводим на одну страницу
+    const works = temp.reduce((rows, key, index) => (index % PER_PAGE == 0 ? rows.push([key])
+        : rows[rows.length-1].push(key)) && rows, []); // Разбиваем массив по страницам
+
+    this.ctx.telegram.sendMediaGroup(
+      this.ctx.from.id,
+      this.typedAsPhoto(works[page].map(it => it.preview))
+    );
+
+    return {
+      items: works,
+      perPage: PER_PAGE};
+    }
+
   async goMain() {
     await this.ctx.scene.leave();
     await this.main(this.ctx);
   }
+
   main = async (ctx) => {};
 }
 

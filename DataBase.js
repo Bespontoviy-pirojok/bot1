@@ -6,6 +6,7 @@ class DataBase {
   middleware() {
     return (ctx, next) => {
       ctx.base = this;
+      this.ctx = ctx;
       next();
     };
   }
@@ -21,6 +22,7 @@ class DataBase {
   async putUser(user) {
     console.log("putUser: ", user);
   }
+
   async getPost(postId) {
     console.log("getPost: ", postId);
     if (postId < 0 || postId > 10) return undefined;
@@ -43,6 +45,11 @@ class DataBase {
         ],
       };
   }
+
+  async getNotSeenPosts() {
+    //TODO вернуть массив не просмотренных постов
+  }
+
   async deletePost(postId) {
     console.log("deletePost: ", postId);
   }
