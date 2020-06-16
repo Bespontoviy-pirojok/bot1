@@ -23,6 +23,7 @@ class DataBase {
   }
   async getPost(postId) {
     console.log("getPost: ", postId);
+    if (postId < 0 || postId > 10) return undefined;
     return postId !== "3"
       ? {
         _id: postId,
@@ -41,6 +42,9 @@ class DataBase {
           "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
         ],
       };
+  }
+  async deletePost(postId) {
+    console.log("deletePost: ", postId);
   }
   async getNewPost(userId) {
     const postId = "типа нью";
