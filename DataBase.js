@@ -49,7 +49,7 @@ class DataBase {
   async getNewPost(userId) {
     const postId = "типа нью";
     this.seenPost(userId, postId);
-    console.log("getNewPost: for ", userId);
+    console.log("getNewPost: for ", userId, " ", postId);
     return this.getPost(postId);
   }
   async seenPost(userId, postId) {
