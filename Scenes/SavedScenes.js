@@ -1,5 +1,6 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+const {tenPhotos} = require("../messages.json")
 
 class SavedScenes {
   constructor() {
@@ -13,12 +14,8 @@ class SavedScenes {
 
     this.scenes.Saved.enter(async (ctx) => {
       await ctx.reply(
-        "Сохраненные",
-        Markup.keyboard([
-          "Следующая страцница",
-          "Предыдущая страцница",
-          "Назад",
-        ])
+        tenPhotos.special.Saved,
+        Markup.keyboard(tenPhotos.buttons)
           .resize()
           .extra()
       );
@@ -36,7 +33,7 @@ class SavedScenes {
       const id = ctx.from.id,
         show = this.way[id];
       switch (ctx.message.text) {
-      case "Следующая страцница":
+      case tenPhotos.next:
         await ctx.wrap.deleteLastNMessage(show.size + 1);
         show.index = ctx.wrap.shiftIndex(
           show.index,
@@ -45,7 +42,7 @@ class SavedScenes {
         );
         show.size = await ctx.wrap.sendWork(show.user.saved[show.index]);
         break;
-      case "Предыдущая страцница":
+      case tenPhotos.prev:
         await ctx.wrap.deleteLastNMessage(show.size + 1);
         show.index = ctx.wrap.shiftIndex(
           show.index,
@@ -54,12 +51,12 @@ class SavedScenes {
         );
         show.size = await ctx.wrap.sendWork(show.user.saved[show.index]);
         break;
-      case "Назад":
+      case tenPhotos.back:
         this.way.delete(id);
         await ctx.wrap.goMain();
         break;
       default:
-        await ctx.reply("Хуйню не неси");
+        await ctx.reply(tenPhotos.default);
       }
     });
   }

@@ -1,5 +1,6 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+const {sendWork} = require("../messages.json")
 
 class SendWorkScenes {
   constructor() {
@@ -15,9 +16,8 @@ class SendWorkScenes {
 
     this.scenes.SendWork.enter(async (ctx) => {
       await ctx.reply(
-        "Отправьте фотографии в формате jpeg или png. Первая фотография " +
-          "будет использоваться в качестве превью к вашей работе",
-        Markup.keyboard(["Отправить", "Назад"]).oneTime().resize().extra()
+        sendWork.send.welcome,
+        Markup.keyboard(sendWork.send.buttons).oneTime().resize().extra()
       );
       //объект работы
       this.work[ctx.from.id] = {
@@ -40,7 +40,7 @@ class SendWorkScenes {
     this.scenes.SendWork.on("text", (ctx) => {
       const id = ctx.from.id;
       switch (ctx.message.text) {
-      case "Отправить":
+      case sendWork.send.push:
         if (
           this.work[id].photos.length > 0 &&
             this.work[id].photos.length < 10
@@ -48,13 +48,13 @@ class SendWorkScenes {
           ctx.scene.enter("DescriptionQuestion");
         } else {
           ctx.reply(
-            "Ты отправил хуевое количество изображений! Попробуй еще раз, долбаеб."
+            sendWork.send.debil
           );
           this.work[id].photos = [];
           ctx.scene.reenter();
         }
         break;
-      case "Назад":
+      case sendWork.send.back:
         this.work.delete(id);
         ctx.wrap.goMain();
       }
@@ -62,21 +62,21 @@ class SendWorkScenes {
 
     this.scenes.DescriptionQuestion.enter(async (ctx) => {
       await ctx.reply(
-        "Добавить описание?",
-        Markup.keyboard(["Да", "Нет", "Назад"]).resize().oneTime().extra()
+        sendWork.description.welcome,
+        Markup.keyboard(sendWork.description.buttons).resize().oneTime().extra()
       );
     });
 
     this.scenes.DescriptionQuestion.on("text", (ctx) => {
       switch (ctx.message.text) {
-      case "Да":
+      case sendWork.description.yes:
         ctx.scene.enter("EnterDescription");
         break;
-      case "Нет":
+      case sendWork.description.no:
         this.work[ctx.from.id].description = null;
         this.sendWork(ctx);
         break;
-      case "Назад":
+      case sendWork.description.back:
         ctx.scene.enter("SendWork");
         this.work.delete(ctx.from.id);
         break;
@@ -84,7 +84,7 @@ class SendWorkScenes {
     });
 
     this.scenes.EnterDescription.enter((ctx) => {
-      ctx.reply("Введите описание вашей работы");
+      ctx.reply(sendWork.description.getDescription);
     });
     this.scenes.EnterDescription.on("text", (ctx) => {
       this.work[ctx.from.id].description = ctx.message.text;
@@ -94,9 +94,7 @@ class SendWorkScenes {
 
   async sendWork(ctx) {
     await ctx.base.putPost(this.work[ctx.from.id]);
-    await ctx.reply(
-      "Работа успешно добавлена, найти её можно в разделе \"Мои работы\""
-    );
+    await ctx.reply(sendWork.description.done);
     this.work.delete(ctx.from.id);
     await ctx.scene.enter("SendWork");
   }
