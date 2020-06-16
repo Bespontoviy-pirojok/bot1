@@ -21,6 +21,10 @@ class Wrapper {
       return 1;
     }
     const post = await this.ctx.base.getPost(postId);
+    if (post === undefined) {
+      this.ctx.reply("Пост удалён");
+      return 1;
+    }
     let size = post.photos.length;
     if (post.description !== null) {
       ++size;
