@@ -19,7 +19,14 @@ class MyRatesScenes {
                     .resize()
                     .extra()
             );
-           я
+            const user = await ctx.base.getUser(ctx.from.id),
+                id = user.id;
+            let show = (this.way[id] = {
+                user: user,
+                index: user.posted.length - 1,
+                size: 0,
+            });
+            show.size = await ctx.wrap.sendWork(show.user.posted[show.index]);
         });
 
         this.scenes.MyRates.on("text", async (ctx) => {
@@ -31,18 +38,18 @@ class MyRatesScenes {
                     show.index = ctx.wrap.shiftIndex(
                         show.index,
                         -1,
-                        show.user.saved.length
+                        show.user.posted.length
                     );
-                    show.size = await ctx.wrap.sendWork(show.user.saved[show.index]);
+                    show.size = await ctx.wrap.sendWork(show.user.posted[show.index]);
                     break;
                 case tenPhotos.prev:
                     await ctx.wrap.deleteLastNMessage(show.size + 1);
                     show.index = ctx.wrap.shiftIndex(
                         show.index,
                         1,
-                        show.user.saved.length
+                        show.user.posted.length
                     );
-                    show.size = await ctx.wrap.sendWork(show.user.saved[show.index]);
+                    show.size = await ctx.wrap.sendWork(show.user.posted[show.index]);
                     break;
                 case tenPhotos.back:
                     this.way.delete(id);

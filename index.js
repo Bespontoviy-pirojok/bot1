@@ -2,33 +2,24 @@
 // https://www.mindmeister.com/ru/1522778260?t=8C07mVgoEn
 
 const config = require("./congif.json");
+const {main} = require("./messages.json")
 
 const Telegraf = require("telegraf");
-const Session = require("telegraf/session");
-const { Markup, Stage } = Telegraf;
+const { Markup, Stage, session } = Telegraf;
 const bot = new Telegraf(config.token);
 
-//  Добавить работу
-const SendWork = require("./Scenes/SendWorkScenes");
-//  Сохраненное
-const Saved = require("./Scenes/SavedScenes");
-
 //  Обработка сцен
-const stage = new Stage([].concat(Saved.getScenes(), SendWork.getScenes()));
+const {ScenesArray} = require("./Scenes")
+const stage = new Stage(ScenesArray);
+
 // Обработка обращений к базе данных
 const base = require("./DataBase").get(config.mongo);
 // Обработка упращённых обращений
 const wrap = require("./Wrapper").get();
 // Главная
 wrap.main = async (ctx) => {
-  ctx.reply(
-    "Бот для всей хуйни",
-    Markup.keyboard([
-      "Посмотреть оценки своих работ",
-      "Сохраненное",
-      "Выложить работу",
-      "Поставить оценку",
-    ])
+  ctx.reply(main.welcome,
+    Markup.keyboard(main.buttons)
       .resize()
       .oneTime()
       .extra()
@@ -36,26 +27,26 @@ wrap.main = async (ctx) => {
 };
 
 // Устанавливаем обработчики
-bot.use(Session(), wrap.middleware(), base.middleware(), stage.middleware());
+bot.use(session(), wrap.middleware(), base.middleware(), stage.middleware());
 // bot.use(Telegraf.log());
 
 // Доступные на главной команды
 bot.start(wrap.main);
 bot.on("text", (ctx) => {
   switch (ctx.message.text) {
-  case "Посмотреть оценки своих работ":
+    case main.MyRates:
     //TODO обработать
-    ctx.reply("ПОШЁЛ НАХУЙ СО СВОИМИ ОЦЕНКАМИ И РАБОТАМИ");
+    ctx.scene.enter("MyRates")
     break;
-  case "Сохраненное":
+  case main.Saved:
     ctx.scene.enter("Saved");
     break;
-  case "Выложить работу":
+  case main.SendWork:
     ctx.scene.enter("SendWork");
     break;
-  case "Поставить оценку":
+  case main.Evaluate:
     //TODO обработать
-    ctx.reply("ПОШЁЛ НАХУЙ СО СВОИМИ ОЦЕНКАМИ");
+    ctx.reply(main.FuckYouLeatherman);
     break;
   }
 });
