@@ -54,7 +54,7 @@ class Wrapper {
     this.free(ctx);  //  Конец сложных запросов, можно разжать булки
   }
   //  Отправка работ
-  async sendWork(ctx, posts, postId) {
+  async sendWorkToUser(ctx, posts, postId) {
     if (postId === "-1") {
       ctx.reply("Здесь пока ничего нет");
       return 1;

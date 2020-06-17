@@ -1,9 +1,11 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+
 const { Works } = require("../messages.json");
 
 class SavedScenes {
   constructor() {
+    //  Декларация сцен
     this.scenes = {
       Saved: new Scene("Saved"),
     };
@@ -15,20 +17,23 @@ class SavedScenes {
       );
       //  Получение объекта пользователя из базы
       const user = await ctx.base.getUser(ctx.from.id);
-
+      //  Получение представления из кеша
       let show = (ctx.session.show = {
         user: user,
         index: user.saved.length - 1,
         size: user.saved.length,
       });
+      //  Отправка пользователю работ
       await ctx.wrap.sendWork(ctx, show.user.saved[show.index]);
     });
 
     this.scenes.Saved.on("text", async (ctx) => {
       const wrap = ctx.wrap,
         show = ctx.session.show;
+
+
       switch (ctx.message.text) {
-      case Works.next:
+        case Works.next:
         await wrap.deleteLastNMessage(ctx);
         wrap.shiftIndex(ctx, -1);
         await wrap.sendWork(ctx, show.user.saved[show.index]);
