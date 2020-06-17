@@ -2,39 +2,40 @@ const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
 const { Works } = require("../messages.json");
 
-class SavedScenes {
+class MyWorksScenes {
   constructor() {
     this.scenes = {
-      Saved: new Scene("Saved"),
+      MyWorks: new Scene("MyWorks"),
     };
 
-    this.scenes.Saved.enter(async (ctx) => {
+    this.scenes.MyWorks.enter(async (ctx) => {
       await ctx.reply(
-        Works.special.Saved,
+        Works.special.MyWorks,
         Markup.keyboard(Works.buttons).resize().extra()
       );
-      const user = await ctx.base.getUser(ctx.from.id);
+      const user = await ctx.base.getUser(ctx.from.id),
+        id = user.id;
       let show = (ctx.session.show = {
         user: user,
-        index: user.saved.length - 1,
-        size: user.saved.length,
+        index: user.posted.length - 1,
+        size: user.posted.length,
       });
-      await ctx.wrap.sendWork(ctx, show.user.saved[show.index]);
+      await ctx.wrap.sendWork(ctx, show.user.posted[show.index]);
     });
 
-    this.scenes.Saved.on("text", async (ctx) => {
+    this.scenes.MyWorks.on("text", async (ctx) => {
       const wrap = ctx.wrap,
         show = ctx.session.show;
       switch (ctx.message.text) {
       case Works.next:
         await wrap.deleteLastNMessage(ctx);
         wrap.shiftIndex(ctx, -1);
-        await wrap.sendWork(ctx, show.user.saved[show.index]);
+        await wrap.sendWork(ctx, show.user.posted[show.index]);
         break;
       case Works.prev:
         await wrap.deleteLastNMessage(ctx);
         wrap.shiftIndex(ctx, 1);
-        await wrap.sendWork(ctx, show.user.saved[show.index]);
+        await wrap.sendWork(ctx, show.user.posted[show.index]);
         break;
       case Works.back:
         await wrap.goMain(ctx);
@@ -53,4 +54,4 @@ class SavedScenes {
   }
 }
 
-module.exports = new SavedScenes();
+module.exports = new MyWorksScenes();

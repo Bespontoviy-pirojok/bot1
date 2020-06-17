@@ -2,21 +2,14 @@
 // https://www.mindmeister.com/ru/1522778260?t=8C07mVgoEn
 
 const config = require("./congif.json");
-const {main} = require("./messages.json")
+const { Main } = require("./messages.json");
 
 const Telegraf = require("telegraf");
 const { Markup, Stage, session } = Telegraf;
 const bot = new Telegraf(config.token);
 
-//  Добавить работу
-const SendWork = require("./Scenes/SendWorkScenes");
-//  Сохраненное
-const Saved = require("./Scenes/SavedScenes");
-//  Оценка работ
-const Rate = require("./Scenes/RateScenes");
-
 //  Обработка сцен
-const {ScenesArray} = require("./Scenes")
+const { ScenesArray } = require("./Scenes");
 const stage = new Stage(ScenesArray);
 
 // Обработка обращений к базе данных
@@ -25,11 +18,9 @@ const base = require("./DataBase").get(config.mongo);
 const wrap = require("./Wrapper").get();
 // Главная
 wrap.main = async (ctx) => {
-  ctx.reply(main.welcome,
-    Markup.keyboard(main.buttons)
-      .resize()
-      .oneTime()
-      .extra()
+  ctx.reply(
+    Main.welcome,
+    Markup.keyboard(Main.buttons).resize().oneTime().extra()
   );
 };
 
@@ -41,21 +32,17 @@ bot.use(session(), wrap.middleware(), base.middleware(), stage.middleware());
 bot.start(wrap.main);
 bot.on("text", (ctx) => {
   switch (ctx.message.text) {
-    case main.MyRates:
-    //TODO обработать
-    ctx.scene.enter("MyRates")
+  case Main.MyWorks:
+    ctx.scene.enter("MyWorks");
     break;
-  case main.Saved:
+  case Main.Saved:
     ctx.scene.enter("Saved");
     break;
-  case main.SendWork:
+  case Main.SendWork:
     ctx.scene.enter("SendWork");
     break;
-  case main.Evaluate:
-    //TODO обработать
+  case Main.Rate:
     ctx.scene.enter("Rate");
-    //ctx.reply("ПОШЁЛ НАХУЙ СО СВОИМИ ОЦЕНКАМИ");
-    ctx.reply(main.FuckYouLeatherman);
     break;
   }
 });

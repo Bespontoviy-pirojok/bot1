@@ -1,64 +1,57 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+const { Works } = require("../messages.json");
 
 class RateScenes {
-    constructor() {
-        // init scenes
-        this.scenes = {
-            Rate: new Scene("Rate"),
-            RateCurrentWork: new Scene("RateCurrentWork")
-        };
-        this.currPage = 0;
-        this.pages = 0;
-        this.works = [];
+  constructor() {
+    this.scenes = {
+      Rate: new Scene("Rate"),
+      RateCurrentWork: new Scene("RateCurrentWork"),
+    };
 
-        // Информация для обработки
-        this.way = new Map();
+    this.scenes.Rate.enter(async (ctx) => {
+      await ctx.reply(
+        Works.special.Rate,
+        Markup.keyboard(Works.rate.buttons).resize().extra()
+      );
+      ctx.session.show = { index: 0 };
+      await ctx.wrap.sendWorksGroup(ctx);
+    });
+    this.scenes.Rate.on("text", async (ctx) => {
+      const wrap = ctx.wrap,
+        show = ctx.session.show;
+      if (/[0-9]/.test(ctx.message.text)) {
+        //TODO: сделать сцену с оценкой выбранного юзером поста
+        await wrap.deleteLastNMessage(ctx);
+        const work = ctx.session.works[+ctx.message.text - 1];
+        if (work === undefined) ctx.reply(Works.retry);
+        else wrap.sendWork(ctx, work._id);
+        return;
+      }
+      switch (ctx.message.text) {
+      case Works.next:
+        await wrap.deleteLastNMessage(ctx);
+        wrap.shiftIndex(ctx, 1);
+        await wrap.sendWorksGroup(ctx);
+        break;
+      case Works.prev:
+        await wrap.deleteLastNMessage(ctx);
+        wrap.shiftIndex(ctx, -1);
+        await wrap.sendWorksGroup(ctx);
+        break;
+      case Works.back:
+        await wrap.goMain(ctx);
+        break;
+      }
+    });
+  }
 
-        this.scenes.Rate.enter(async (ctx) => {
-            await ctx.reply(
-                "Сохраненные",
-                Markup.keyboard([
-                    "Следующая страцница",
-                    "Предыдущая страцница",
-                    "Назад",
-                ])
-                    .resize()
-                    .extra()
-            );
-            const works = await ctx.wrap.sendWorksGroup(this.currPage); // Вот это наверное хуево, но я хз как по-другому сделать
-            this.works = works.items;
-            this.perPage = works.perPage;
-            this.pages = works.items.length - 1;
-        });
-        this.scenes.Rate.on("text", async (ctx) => {
-            if (/[0-9]/.test(ctx.message.text)) {
-                //TODO: сделать сцену с оценкой выбранного юзером поста
-                ctx.wrap.sendWork(this.works[this.currPage][+ctx.message.text-1]._id); //  Вывод выбранного юзером поста
-            }
-            switch (ctx.message.text) {
-                case "Следующая страцница":
-                    await ctx.wrap.deleteLastNMessage(this.perPage+1);
-                    this.currPage >= this.pages ? await ctx.wrap.sendWorksGroup(this.currPage) : await ctx.wrap.sendWorksGroup(++this.currPage);
-                    break;
-                case "Предыдущая страцница":
-                    await ctx.wrap.deleteLastNMessage(this.perPage+1);
-                    this.currPage <= 0 ? await ctx.wrap.sendWorksGroup(this.currPage) : await ctx.wrap.sendWorksGroup(--this.currPage);
-                    break;
-                case "Назад":
-                    // this.way.delete(id);
-                    await ctx.wrap.goMain();
-                    break;
-            }
-        });
-    }
-
-    getScene(name) {
-        return this.scenes[name];
-    }
-    getScenes() {
-        return Object.values(this.scenes);
-    }
+  getScene(name) {
+    return this.scenes[name];
+  }
+  getScenes() {
+    return Object.values(this.scenes);
+  }
 }
 
 module.exports = new RateScenes();

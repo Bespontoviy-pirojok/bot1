@@ -46,8 +46,35 @@ class DataBase {
       };
   }
 
-  async getNotSeenPosts() {
-    //TODO вернуть массив не просмотренных постов
+  async getNotSeenPosts(userId) {
+    console.log("getNotSeenPosts: ", userId);
+    return [
+      {
+        _id: "1",
+        preview:
+          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
+      },
+      {
+        _id: "3",
+        preview:
+          "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
+      },
+      {
+        _id: "4",
+        preview:
+          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
+      },
+      {
+        _id: "5",
+        preview:
+          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
+      },
+      {
+        _id: "6",
+        preview:
+          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
+      },
+    ];
   }
 
   async deletePost(postId) {
@@ -59,8 +86,8 @@ class DataBase {
     console.log("getNewPost: for ", userId, " ", postId);
     return this.getPost(postId);
   }
-  async seenPost(userId, postId) {
-    console.log("seenPost: ", userId, postId);
+  async seenPosts(userId, postId) {
+    console.log("seenPosts: ", userId, postId);
   }
   async putPost(post) {
     console.log("putPost: ", post);
