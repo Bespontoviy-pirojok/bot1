@@ -32,7 +32,7 @@ class SavedScenes {
         show = ctx.session.show;
 
       switch (ctx.message.text) {
-        case Works.next:
+      case Works.next:
         await wrap.deleteLastNMessage(ctx);
         wrap.shiftIndex(ctx, -1);
         await wrap.sendWork(ctx, show.user.saved[show.index]);

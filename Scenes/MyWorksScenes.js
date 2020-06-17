@@ -27,7 +27,7 @@ class MyWorksScenes {
 
     this.scenes.MyWorks.on("text", async (ctx) => {
       const wrap = ctx.wrap,
-        show = ctx.session.show
+        show = ctx.session.show;
 
       switch (ctx.message.text) {
       case Works.next:

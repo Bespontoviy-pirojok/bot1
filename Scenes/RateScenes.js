@@ -57,7 +57,7 @@ class RateScenes {
       else{
         await wrap.sendWork(ctx, work._id);
         await ctx.reply("Оцените работу!", Extra.HTML().markup((m)=>
-            m.inlineKeyboard([...Array(5).keys()].map((a, i) => m.callbackButton(String(i), String(i)) ))));
+          m.inlineKeyboard([...Array(5).keys()].map((a, i) => m.callbackButton(String(i), String(i)) ))));
       }
     });
     this.scenes.RateCurrentWork.action(/[1-5]/, async (ctx) => {
