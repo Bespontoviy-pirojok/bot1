@@ -1,11 +1,7 @@
-const SendWork = require("./SendWorkScenes")
-const MyRates = require("./MyRatesScenes")
-const Saved = require("./SavedScenes")
+const AllScenes = ["SendWork", "MyWorks", "Saved", "Rate"];
+let ScenesArray = [];
+AllScenes.forEach((name) => {
+  ScenesArray = ScenesArray.concat(require("./" + name + "Scenes").getScenes());
+});
 
-const AllScenes = [SendWork, MyRates, Saved]
-let ScenesArray = []
-AllScenes.forEach(elm=> {
-    ScenesArray = ScenesArray.concat(elm.getScenes())
-})
-
-module.exports.ScenesArray = ScenesArray
+module.exports.ScenesArray = ScenesArray;
