@@ -1,13 +1,11 @@
 const Scene = require("telegraf/scenes/base");
-const Markup = require("telegraf/markup");
-const Extra = require("telegraf/extra");
+const { Markup, Extra } = require("telegraf");
 const { Works } = require("../messages.json");
 
 class RateScenes {
   constructor() {
     this.scenes = {
       Rate: new Scene("Rate"),
-      RateCurrentWork: new Scene("RateCurrentWork"),
     };
 
     this.scenes.Rate.enter(async (ctx) => {
@@ -17,18 +15,35 @@ class RateScenes {
       );
       ctx.session.show = { index: 0 };
       await ctx.wrap.sendWorksGroup(ctx);
+      ctx.session.show.array = ctx.session.works;
+    });
+
+    this.scenes.Rate.action(/([1-5])-([\w\D]*)/, async (ctx) => {
+      await ctx.answerCbQuery();
+      const { message_id, chat } = await ctx.reply(
+        `Хуйню неси. Твоя оценка: ${ctx.match[1]}`
+      );
+      ctx.session.show.messageSize++;
+      ctx.wrap.checkDos(ctx);
+      setTimeout(() => {
+        ctx.telegram.deleteMessage(chat.id, message_id);
+        ctx.session.show.messageSize--;
+      }, 3000);
+      //TODO: ctx.base.putRate(match[2]/*postId*/, match[1]/*rate*/);
+      //TODO: ctx.base.userRate(ctx.from.id, match[2]/*postId*/)
     });
 
     this.scenes.Rate.on("text", async (ctx) => {
-      const wrap = ctx.wrap;
+      const wrap = ctx.wrap,
+        show = ctx.session.show;
       if (/[0-9]/.test(ctx.message.text)) {
-        ctx.session.curWork = {
-          index: ctx.message.text
-        };
-        await wrap.deleteLastNMessage(ctx);
-        ctx.scene.enter("RateCurrentWork");
-        //TODO: сделать сцену с оценкой выбранного юзером поста
-
+        show.indexWork = +ctx.message.text - 1;
+        show.array = ctx.session.works;
+        if (!show.array[show.indexWork]) {
+          ctx.reply(Works.retry);
+          show.messageSize += 2;
+          wrap.checkDos(ctx, wrap.deleteLastNMessage);
+        } else await this.showToRate(ctx);
         return;
       }
 
@@ -48,26 +63,30 @@ class RateScenes {
         break;
       }
     });
-    this.scenes.RateCurrentWork.enter(async (ctx) => {
-      const wrap = ctx.wrap;
-      let curWork = ctx.session.curWork;
-      console.log(curWork.index);
-      const work = ctx.session.works[+curWork.index - 1];
-      if (work === undefined) ctx.reply(Works.retry);
-      else{
-        await wrap.sendWork(ctx, work._id);
-        await ctx.reply("Оцените работу!", Extra.HTML().markup((m)=>
-          m.inlineKeyboard([...Array(5).keys()].map((a, i) => m.callbackButton(String(i), String(i)) ))));
-      }
-    });
-    this.scenes.RateCurrentWork.action(/[1-5]/, async (ctx) => {
-      await ctx.answerCbQuery();
-      console.log(ctx.match[0]);
-      await ctx.reply(`Хуйню неси. Твоя оценка: ${ctx.match[0]}`);
-      // TODO: въебать оценку.
-    });
   }
 
+  async showToRate(ctx) {
+    const wrap = ctx.wrap,
+      show = ctx.session.show;
+    await wrap.deleteLastNMessage(ctx);
+    [show.index, show.indexWork] = [show.indexWork, show.index];
+    await wrap.sendWork(ctx);
+    await ctx.reply(
+      "Оцените работу!",
+      Extra.HTML().markup((m) =>
+        m.inlineKeyboard(
+          [...Array(5).keys()].map((i) =>
+            m.callbackButton(
+              String(i + 1),
+              String(i + 1) + "-" + show.array[show.index]._id
+            )
+          )
+        )
+      )
+    );
+    [show.index, show.indexWork] = [show.indexWork, show.index];
+    show.messageSize++;
+  }
 
   getScene(name) {
     return this.scenes[name];

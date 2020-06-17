@@ -13,10 +13,10 @@ class DataBase {
   async getUser(userId) {
     console.log("getUser: ", userId);
     return {
-      id: userId,
-      saved: ["1", "3", "2", "10"], // [],
-      posted: ["1", "4"],
-      seen: ["2"],
+      _id: userId,
+      saved: [{ _id: "1" }, { _id: "3" }, { _id: "2" }, { _id: "10" }], // [],
+      posted: [{ _id: "1" }, { _id: "4" }],
+      seen: [{ _id: "2" }],
     };
   }
   async putUser(user) {

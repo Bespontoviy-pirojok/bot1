@@ -15,30 +15,29 @@ class MyWorksScenes {
         Works.special.MyWorks,
         Markup.keyboard(Works.buttons).resize().extra()
       );
-      const user = await ctx.base.getUser(ctx.from.id);
-      //  Получение индексации кеша
-      let show = (ctx.session.show = {
-        user: user,
-        index: user.posted.length - 1,
-        size: user.posted.length,
-      });
-      await ctx.wrap.sendWork(ctx, show.user.posted[show.index]);
+      const posted = (await ctx.base.getUser(ctx.from.id)).posted;
+      //  Индексация кеша
+      ctx.session.show = {
+        index: posted.length - 1,
+        size: posted.length,
+        array: posted,
+      };
+      await ctx.wrap.sendWork(ctx);
     });
 
     this.scenes.MyWorks.on("text", async (ctx) => {
-      const wrap = ctx.wrap,
-        show = ctx.session.show;
+      const wrap = ctx.wrap;
 
       switch (ctx.message.text) {
       case Works.next:
         await wrap.deleteLastNMessage(ctx);
         wrap.shiftIndex(ctx, -1);
-        await wrap.sendWork(ctx, show.user.posted[show.index]);
+        await wrap.sendWork(ctx);
         break;
       case Works.prev:
         await wrap.deleteLastNMessage(ctx);
         wrap.shiftIndex(ctx, 1);
-        await wrap.sendWork(ctx, show.user.posted[show.index]);
+        await wrap.sendWork(ctx);
         break;
       case Works.back:
         await wrap.goMain(ctx);

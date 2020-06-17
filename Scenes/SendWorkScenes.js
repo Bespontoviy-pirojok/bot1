@@ -26,10 +26,10 @@ class SendWorkScenes {
     });
 
     this.scenes.SendWork.on("photo", async (ctx) => {
-      const work = ctx.session.work;  //  Получение работ из кеша
-      work.authId = ctx.from.id;  //  Id пользователя
+      const work = ctx.session.work; //  Получение работ из кеша
+      work.authId = ctx.from.id; //  Id пользователя
       work.photos = work.photos || [];
-      work.photos.push(ctx.message.photo.pop().file_id);  //  Получение самой графонисторй фотографии
+      work.photos.push(ctx.message.photo.pop().file_id); //  Получение самой графонисторй фотографии
     });
 
     this.scenes.SendWork.on("text", (ctx) => {

@@ -16,31 +16,30 @@ class SavedScenes {
         Markup.keyboard(Works.buttons).resize().extra()
       );
       //  Получение объекта пользователя из базы
-      const user = await ctx.base.getUser(ctx.from.id);
-      //  Получение индексации кеша
-      let show = (ctx.session.show = {
-        user: user,
-        index: user.saved.length - 1,
-        size: user.saved.length,
-      });
+      const saved = (await ctx.base.getUser(ctx.from.id)).saved;
+      //  Индексация кеша
+      ctx.session.show = {
+        index: saved.length - 1,
+        size: saved.length,
+        array: saved,
+      };
       //  Отправка пользователю работ
-      await ctx.wrap.sendWork(ctx, show.user.saved[show.index]);
+      await ctx.wrap.sendWork(ctx);
     });
 
     this.scenes.Saved.on("text", async (ctx) => {
-      const wrap = ctx.wrap,
-        show = ctx.session.show;
+      const wrap = ctx.wrap;
 
       switch (ctx.message.text) {
       case Works.next:
         await wrap.deleteLastNMessage(ctx);
         wrap.shiftIndex(ctx, -1);
-        await wrap.sendWork(ctx, show.user.saved[show.index]);
+        await wrap.sendWork(ctx);
         break;
       case Works.prev:
         await wrap.deleteLastNMessage(ctx);
         wrap.shiftIndex(ctx, 1);
-        await wrap.sendWork(ctx, show.user.saved[show.index]);
+        await wrap.sendWork(ctx);
         break;
       case Works.back:
         await wrap.goMain(ctx);
