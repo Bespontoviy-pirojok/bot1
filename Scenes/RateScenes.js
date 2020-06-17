@@ -18,8 +18,7 @@ class RateScenes {
       await ctx.wrap.sendWorksGroup(ctx);
     });
     this.scenes.Rate.on("text", async (ctx) => {
-      const wrap = ctx.wrap,
-        show = ctx.session.show;
+      const wrap = ctx.wrap;
       if (/[0-9]/.test(ctx.message.text)) {
         //TODO: сделать сцену с оценкой выбранного юзером поста
         await wrap.deleteLastNMessage(ctx);

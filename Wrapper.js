@@ -53,7 +53,10 @@ class Wrapper {
       ++size;
       await ctx.reply(post.description);
     }
-    ctx.telegram.sendMediaGroup(ctx.from.id, this.typedAsPhoto(post.photos));
+    await ctx.telegram.sendMediaGroup(
+      ctx.from.id,
+      this.typedAsPhoto(post.photos)
+    );
     ctx.session.show.messageSize = size;
     return size;
   }

@@ -13,8 +13,7 @@ class MyWorksScenes {
         Works.special.MyWorks,
         Markup.keyboard(Works.buttons).resize().extra()
       );
-      const user = await ctx.base.getUser(ctx.from.id),
-        id = user.id;
+      const user = await ctx.base.getUser(ctx.from.id);
       let show = (ctx.session.show = {
         user: user,
         index: user.posted.length - 1,

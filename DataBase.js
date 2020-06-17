@@ -76,7 +76,6 @@ class DataBase {
       },
     ];
   }
-
   async deletePost(postId) {
     console.log("deletePost: ", postId);
   }

@@ -55,7 +55,6 @@ class SendWorkScenes {
     });
 
     this.scenes.DescriptionQuestion.on("text", (ctx) => {
-      const work = ctx.session.work;
       switch (ctx.message.text) {
       case SendWork.description.yes:
         ctx.scene.enter("EnterDescription");
