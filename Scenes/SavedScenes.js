@@ -13,7 +13,9 @@ class SavedScenes {
         Works.special.Saved,
         Markup.keyboard(Works.buttons).resize().extra()
       );
+      //  Получение объекта пользователя из базы
       const user = await ctx.base.getUser(ctx.from.id);
+
       let show = (ctx.session.show = {
         user: user,
         index: user.saved.length - 1,
