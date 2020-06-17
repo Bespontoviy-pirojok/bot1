@@ -17,7 +17,7 @@ class SavedScenes {
       );
       //  Получение объекта пользователя из базы
       const user = await ctx.base.getUser(ctx.from.id);
-      //  Получение представления из кеша
+      //  Получение индексации кеша
       let show = (ctx.session.show = {
         user: user,
         index: user.saved.length - 1,
@@ -30,7 +30,6 @@ class SavedScenes {
     this.scenes.Saved.on("text", async (ctx) => {
       const wrap = ctx.wrap,
         show = ctx.session.show;
-
 
       switch (ctx.message.text) {
         case Works.next:

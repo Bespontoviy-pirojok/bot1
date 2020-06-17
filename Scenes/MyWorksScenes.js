@@ -1,9 +1,11 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+
 const { Works } = require("../messages.json");
 
 class MyWorksScenes {
   constructor() {
+    // Декларация сцен
     this.scenes = {
       MyWorks: new Scene("MyWorks"),
     };
@@ -14,6 +16,7 @@ class MyWorksScenes {
         Markup.keyboard(Works.buttons).resize().extra()
       );
       const user = await ctx.base.getUser(ctx.from.id);
+      //  Получение индексации кеша
       let show = (ctx.session.show = {
         user: user,
         index: user.posted.length - 1,
@@ -24,7 +27,8 @@ class MyWorksScenes {
 
     this.scenes.MyWorks.on("text", async (ctx) => {
       const wrap = ctx.wrap,
-        show = ctx.session.show;
+        show = ctx.session.show
+
       switch (ctx.message.text) {
       case Works.next:
         await wrap.deleteLastNMessage(ctx);
