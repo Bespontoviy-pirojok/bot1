@@ -17,6 +17,7 @@ class RateScenes {
       ctx.session.show = { index: 0 };
       await ctx.wrap.sendWorksGroup(ctx);
     });
+
     this.scenes.Rate.on("text", async (ctx) => {
       const wrap = ctx.wrap;
       if (/[0-9]/.test(ctx.message.text)) {
@@ -27,6 +28,7 @@ class RateScenes {
         else wrap.sendWork(ctx, work._id);
         return;
       }
+
       switch (ctx.message.text) {
       case Works.next:
         await wrap.deleteLastNMessage(ctx);

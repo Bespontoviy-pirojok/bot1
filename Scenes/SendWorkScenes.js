@@ -5,6 +5,7 @@ const { SendWork } = require("../messages.json");
 
 class SendWorkScenes {
   constructor() {
+    //  Декларация сцен
     this.scenes = {
       SendWork: new Scene("SendWork"),
       DescriptionQuestion: new Scene("DescriptionQuestion"),
@@ -25,21 +26,23 @@ class SendWorkScenes {
     });
 
     this.scenes.SendWork.on("photo", async (ctx) => {
-      const thisPhoto = ctx.message.photo.length - 1,
-        work = ctx.session.work;
-      work.authId = ctx.from.id;
+      const work = ctx.session.work;  //  Получение работ из кеша
+      work.authId = ctx.from.id;  //  Id пользователя
       work.photos = work.photos || [];
-      work.photos.push(ctx.message.photo[thisPhoto].file_id);
+      work.photos.push(ctx.message.photo.pop().file_id);  //  Получение самой графонисторй фотографии
     });
 
     this.scenes.SendWork.on("text", (ctx) => {
       const work = ctx.session.work;
+
       switch (ctx.message.text) {
       case SendWork.send.push:
+        //  Если есть фото и их можно вместить в альбом
         if (work.photos.length > 0 && work.photos.length < 10) {
           ctx.scene.enter("DescriptionQuestion");
         } else {
           ctx.reply(SendWork.send.retry);
+          //  Очищение локального кеша с фотками
           work.photos = [];
         }
         break;
