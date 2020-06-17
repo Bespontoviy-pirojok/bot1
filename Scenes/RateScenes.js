@@ -1,5 +1,6 @@
 const Scene = require("telegraf/scenes/base");
 const Markup = require("telegraf/markup");
+const Extra = require("telegraf/extra");
 const { Works } = require("../messages.json");
 
 class RateScenes {
@@ -20,11 +21,13 @@ class RateScenes {
     this.scenes.Rate.on("text", async (ctx) => {
       const wrap = ctx.wrap;
       if (/[0-9]/.test(ctx.message.text)) {
-        //TODO: сделать сцену с оценкой выбранного юзером поста
+        ctx.session.curWork = {
+          index: ctx.message.text
+        };
         await wrap.deleteLastNMessage(ctx);
-        const work = ctx.session.works[+ctx.message.text - 1];
-        if (work === undefined) ctx.reply(Works.retry);
-        else wrap.sendWork(ctx, work._id);
+        ctx.scene.enter("RateCurrentWork");
+        //TODO: сделать сцену с оценкой выбранного юзером поста
+
         return;
       }
       switch (ctx.message.text) {
@@ -43,7 +46,26 @@ class RateScenes {
         break;
       }
     });
+    this.scenes.RateCurrentWork.enter(async (ctx) => {
+      const wrap = ctx.wrap;
+      let curWork = ctx.session.curWork;
+      console.log(curWork.index);
+      const work = ctx.session.works[+curWork.index - 1];
+      if (work === undefined) ctx.reply(Works.retry);
+      else{
+        await wrap.sendWork(ctx, work._id);
+        await ctx.reply("Оцените работу!", Extra.HTML().markup((m)=>
+            m.inlineKeyboard([...Array(5).keys()].map((a, i) => m.callbackButton(String(i), String(i)) ))));
+      }
+    });
+    this.scenes.RateCurrentWork.action(/[1-5]/, async (ctx) => {
+      await ctx.answerCbQuery();
+      console.log(ctx.match[0]);
+      await ctx.reply(`Хуйню неси. Твоя оценка: ${ctx.match[0]}`);
+      // TODO: въебать оценку.
+    });
   }
+
 
   getScene(name) {
     return this.scenes[name];
