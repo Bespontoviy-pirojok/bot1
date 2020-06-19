@@ -1,10 +1,4 @@
 {
   "token": "1165770908:AAE0EUIto0BnCFdsD1u5tOgvWF5-HuF-HPM",
-  "mongo": "mongodb+srv://dima:HvJGezUtsFszxwLt@sosister-wmc26.mongodb.net/april?retryWrites=true&w=majority",
-  "socks5": {
-    "socksHost": "interferstd.ru",
-    "socksPort": 9050,
-    "socksUser": "admin",
-    "socksPass": "adminovich"
-  }
+  "mongo": "mongodb+srv://dima:HvJGezUtsFszxwLt@sosister-wmc26.mongodb.net/april?retryWrites=true&w=majority"
 }

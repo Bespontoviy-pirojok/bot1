@@ -1,7 +1,6 @@
-const AllScenes = ["SendWork", "MyWorks", "Saved", "Rate"];
-let ScenesArray = [];
-AllScenes.forEach((name) => {
-  ScenesArray = ScenesArray.concat(require("./" + name + "Scenes").getScenes());
-});
+if (global.ScenesController === undefined)
+  ["SendWork", "MyWorks", "Saved", "Rate"].map((name) => {
+    require("./" + name + "Scenes");
+  });
 
-module.exports.ScenesArray = ScenesArray;
+module.exports = require("./Scenes");

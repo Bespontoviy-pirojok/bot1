@@ -1,61 +1,47 @@
-const Scene = require("telegraf/scenes/base");
-const Markup = require("telegraf/markup");
-
+const { Scene, Markup } = require("./Scenes");
 const { Works } = require("../messages.json");
 
-class SavedScenes {
+new (class SavedScene extends Scene {
   constructor() {
-    //  Декларация сцен
-    this.scenes = {
-      Saved: new Scene("Saved"),
+    super("Saved");
+    super.struct = {
+      enter: [[this.enter]],
+      on: [["text", this.main]],
     };
-
-    this.scenes.Saved.enter(async (ctx) => {
-      await ctx.reply(
-        Works.special.Saved,
-        Markup.keyboard(Works.buttons).resize().extra()
-      );
-      //  Получение объекта пользователя из базы
-      const saved = (await ctx.base.getUser(ctx.from.id)).saved;
-      //  Индексация кеша
-      ctx.session.show = {
-        index: saved.length - 1,
-        size: saved.length,
-        array: saved,
-      };
-      //  Отправка пользователю работ
-      await ctx.wrap.sendWork(ctx);
-    });
-
-    this.scenes.Saved.on("text", async (ctx) => {
-      const wrap = ctx.wrap;
-
-      switch (ctx.message.text) {
-      case Works.next:
-        await wrap.deleteLastNMessage(ctx);
-        wrap.shiftIndex(ctx, -1);
-        await wrap.sendWork(ctx);
-        break;
-      case Works.prev:
-        await wrap.deleteLastNMessage(ctx);
-        wrap.shiftIndex(ctx, 1);
-        await wrap.sendWork(ctx);
-        break;
-      case Works.back:
-        await wrap.goMain(ctx);
-        break;
-      default:
-        await ctx.reply(Works.default);
-      }
-    });
   }
 
-  getScene(name) {
-    return this.scenes[name];
+  async enter(ctx) {
+    await ctx.reply(
+      Works.special.Saved,
+      Markup.keyboard(Works.buttons).resize().extra()
+    );
+    //  Получение объекта пользователя из базы
+    const saved = (await ctx.base.getUser(ctx.from.id)).saved;
+    //  Индексация кеша
+    ctx.session.show = {
+      index: saved.length - 1,
+      size: saved.length,
+      array: saved,
+    };
+    //  Отправка пользователю работ
+    await ctx.user.sendWork(ctx);
   }
-  getScenes() {
-    return Object.values(this.scenes);
-  }
-}
 
-module.exports = new SavedScenes();
+  async main(ctx) {
+    var user = ctx.user;
+
+    switch (ctx.message.text) {
+    case Works.next:
+      user.updateWith(user.shiftIndex(ctx, -1), user.sendWork);
+      break;
+    case Works.prev:
+      user.updateWith(user.shiftIndex(ctx, 1), user.sendWork);
+      break;
+    case Works.back:
+      user.goMain(ctx);
+      break;
+    default:
+      ctx.reply(Works.default);
+    }
+  }
+})();

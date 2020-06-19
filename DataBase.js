@@ -6,7 +6,6 @@ class DataBase {
   middleware() {
     return (ctx, next) => {
       ctx.base = this;
-      this.ctx = ctx;
       next();
     };
   }
