@@ -2,7 +2,8 @@ const { Scene, Markup } = require("./Scenes");
 const { SendWork } = require("../messages.json");
 
 async function sendWork(ctx) {
-  await ctx.base.putPost(ctx.session.work);
+  const work = await ctx.base.setPost(ctx.session.work);
+  await ctx.base.postedPost(ctx.from.id, work._id);
   await ctx.reply(SendWork.description.done);
   await ctx.scene.enter("SendWork");
 }
@@ -79,7 +80,7 @@ new (class DescriptionQuestionScene extends Scene {
       ctx.scene.enter("EnterDescription");
       break;
     case SendWork.description.no:
-      this.SendWork(ctx);
+      sendWork(ctx);
       break;
     case SendWork.description.back:
       ctx.scene.enter("SendWork");

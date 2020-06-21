@@ -1,22 +1,17 @@
 // @mamkin_designer_bot
 // https://www.mindmeister.com/ru/1522778260?t=8C07mVgoEn
 
-const config = require("./congif.json");
+const { token, mongo } = require("./congif.json");
 const { Main } = require("./messages.json");
 
-const {
-  Telegraf,
-  Markup,
-  Stage,
-  session,
-  ScenesController,
-} = require("./Scenes");
-const bot = new Telegraf(config.token);
+const { Telegraf, Markup, session } = require("./Scenes");
 
+// Роутер бота
+const bot = new Telegraf(token);
 // Обработка обращений к базе данных
-const base = require("./DataBase").get(config.mongo);
+const base = require("./Wrapper/DataBase").get(mongo);
 // Обработка упращённых обращений
-const user = require("./User").get();
+const user = require("./Wrapper/User").get();
 // Главная
 user.main = async (ctx) => {
   ctx.reply(
@@ -30,14 +25,22 @@ bot.use(
   session(),
   user.middleware(),
   base.middleware(),
-  global.ScenesController.stage.middleware()
+  global.Scenes.stage.middleware()
 );
 // bot.use(Telegraf.log());
 // console.log(global.ScenesController.scenesId());
 
 // Доступные на главной команды
 bot.start(user.main);
-bot.on("text", (ctx) => {
+bot.on("text", async (ctx) => {
+  if (!ctx.session.inited && !(await ctx.base.getUser(ctx.from.id)))
+    await ctx.base.setUser({
+      _id: ctx.from.id,
+      saved: [],
+      posted: [],
+      seen: [],
+    });
+  ctx.session.inited = true;
   switch (ctx.message.text) {
   case Main.MyWorks:
     ctx.scene.enter("MyWorks");
@@ -54,4 +57,9 @@ bot.on("text", (ctx) => {
   }
 });
 
-bot.launch().then(() => console.log("Я ЖИВ!"));
+global.Controller.on("DataBaseConnected", async () => {
+  await bot.launch();
+  console.log(await global.DataBaseController.get("Post"));
+  console.log(await global.DataBaseController.get("User"));
+  global.console.log("Listening...");
+});

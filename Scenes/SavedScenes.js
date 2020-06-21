@@ -24,7 +24,7 @@ new (class SavedScene extends Scene {
       array: saved,
     };
     //  Отправка пользователю работ
-    await ctx.user.sendWork(ctx);
+    ctx.session.show.messageSize = await ctx.user.sendWork(ctx);
   }
 
   async main(ctx) {

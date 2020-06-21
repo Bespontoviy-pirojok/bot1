@@ -27,14 +27,14 @@ class User extends Wrapper {
   //  Смещения указателя show.index на shift в пределах show.size
   shiftIndex(ctx, shift) {
     const show = ctx.session.show;
-    if (show.index === -1) return -1; // -1, если нечего индексировать
+    if (show.index === "-1") return "-1"; // -1, если нечего индексировать
     show.index = (show.index + ((show.size + shift) % show.size)) % show.size; //  Само смещение
     return ctx;
   }
   // Обновление показываемого пользователю
   async updateWith(ctx, update) {
     await this.deleteLastNMessage(ctx);
-    await update.call(this, ctx);
+    ctx.session.show.messageSize = await update.call(this, ctx);
   }
   // Удаление послених N сообщений
   async deleteLastNMessage(ctx, n) {
@@ -55,12 +55,14 @@ class User extends Wrapper {
   }
   //  Отправка работ
   async sendWork(ctx, postId) {
+    const show = ctx.session.show,
+      posts = show.array;
+    postId =
+      postId || (posts && posts[show.index] && posts[show.index]._id) || "-1";
     if (postId === "-1") {
       ctx.reply("Здесь пока ничего нет");
       return 1;
     }
-    const posts = ctx.session.show.array;
-    postId = postId || (posts && posts[ctx.session.show.index]._id);
     const post = await ctx.base.getPost(postId);
     if (post === undefined) {
       ctx.reply("Пост удалён");

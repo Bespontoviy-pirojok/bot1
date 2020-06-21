@@ -1,6 +1,7 @@
 const Telegraf = require("telegraf");
 const { Stage, session, Markup, Extra } = Telegraf;
 const SceneBase = require("telegraf/scenes/base");
+const Emitter = require("events").EventEmitter;
 
 // Если нам понадобиться разбыть сцены по группам
 class Scenes {
@@ -21,14 +22,27 @@ class Scenes {
   }
 }
 
-// Единыжды создаст контроллер сцен
-if (global.ScenesController === undefined)
-  global.ScenesController = new Scenes();
+class Controller extends Emitter {
+  constructor() {
+    super();
+  }
+  set struct(struct) {
+    for (var name in struct) {
+      for (var args of struct[name]) {
+        switch (name) {
+        case "on":
+          this.on(...args);
+          break;
+        }
+      }
+    }
+  }
+}
 
 class Scene {
   constructor(name) {
     this.name = name;
-    this.scene = global.ScenesController.scene[name] = new SceneBase(name);
+    this.scene = global.Scenes.scene[name] = new SceneBase(name);
   }
   get struct() {
     return this.sceneStruct;
@@ -55,30 +69,8 @@ class Scene {
   }
 }
 
-// Это работает примерно так
-// то есть нужно будет разметить
-// сам по себе класс может содержать любого рода штуки
-class templet extends Scene {
-  constructor() {
-    super("templet");
-    super.struct = {
-      on: [
-        ["text", onText],
-        ["photo", onPhoto],
-      ],
-      start: [main],
-    };
-  }
-  main(ctx) {
-    ctx.reply("Main");
-  }
-  onText(ctx) {
-    ctx.reply("Чё");
-  }
-  onPhoto(ctx) {
-    ctx.reply("Вау");
-  }
-}
-//=============================
+// Единыжды создаст контроллер и сцены (восстановит в случае чего)
+if (global.Scenes === undefined) global.Scenes = new Scenes();
+if (global.Controller === undefined) global.Controller = new Controller();
 
 module.exports = { Scene, Scenes, Stage, session, Markup, Extra, Telegraf };
