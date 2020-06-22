@@ -28,7 +28,7 @@ new (class SavedScene extends Scene {
   }
 
   async main(ctx) {
-    var user = ctx.user;
+    const user = ctx.user;
 
     switch (ctx.message.text) {
     case Works.next:

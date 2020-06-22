@@ -50,7 +50,7 @@ new (class RateScene extends Scene {
       `Хуйню неси. Твоя оценка: ${ctx.match[1]}`
     );
     ctx.session.show.messageSize++;
-    ctx.user.checkDos(ctx);
+    await ctx.user.checkDos(ctx);
     setTimeout(() => {
       ctx.telegram.deleteMessage(chat.id, message_id);
       ctx.session.show.messageSize--;

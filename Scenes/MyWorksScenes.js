@@ -27,7 +27,6 @@ new (class MyWorksScene extends Scene {
 
   async main(ctx) {
     const user = ctx.user;
-
     switch (ctx.message.text) {
     case Works.next:
       user.updateWith(user.shiftIndex(ctx, -1), user.sendWork);

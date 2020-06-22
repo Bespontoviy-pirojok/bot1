@@ -4,8 +4,6 @@ const { SendWork } = require("../messages.json");
 async function sendWork(ctx) {
   const work = await ctx.base.setPost(ctx.session.work);
   await ctx.base.postedPost(ctx.from.id, work._id);
-  await ctx.reply(SendWork.description.done);
-  await ctx.scene.enter("SendWork");
 }
 
 new (class SendWorkScene extends Scene {
@@ -32,21 +30,21 @@ new (class SendWorkScene extends Scene {
     };
   }
 
-  addPhoto(ctx) {
+  async addPhoto(ctx) {
     const work = ctx.session.work; //  Получение работ из кеша
     work.authId = ctx.from.id; //  Id пользователя
     work.photos = work.photos || [];
     work.photos.push(ctx.message.photo.pop().file_id); //  Получение самой графонисторй фотографии
   }
 
-  main(ctx) {
+  async main(ctx) {
     const work = ctx.session.work;
 
     switch (ctx.message.text) {
     case SendWork.send.push:
       //  Если есть фото и их можно вместить в альбом
       if (work.photos.length > 0 && work.photos.length < 10) {
-        ctx.scene.enter("DescriptionQuestion");
+        await ctx.scene.enter("DescriptionQuestion");
       } else {
         ctx.reply(SendWork.send.retry);
         //  Очищение локального кеша с фотками
@@ -54,7 +52,7 @@ new (class SendWorkScene extends Scene {
       }
       break;
     case SendWork.send.back:
-      ctx.user.goMain(ctx);
+      await ctx.user.goMain(ctx);
     }
   }
 })();
@@ -67,23 +65,24 @@ new (class DescriptionQuestionScene extends Scene {
       on: [["text", this.main]],
     };
   }
-  question(ctx) {
-    ctx.reply(
+  async question(ctx) {
+    await ctx.reply(
       SendWork.description.welcome,
       Markup.keyboard(SendWork.description.buttons).resize().oneTime().extra()
     );
   }
 
-  main(ctx) {
+  async main(ctx) {
     switch (ctx.message.text) {
     case SendWork.description.yes:
-      ctx.scene.enter("EnterDescription");
+      await ctx.scene.enter("EnterDescription");
       break;
     case SendWork.description.no:
-      sendWork(ctx);
+      await sendWork(ctx);
+      await ctx.scene.enter("SendNextWorkQuestion");
       break;
     case SendWork.description.back:
-      ctx.scene.enter("SendWork");
+      await ctx.scene.enter("SendWork");
       break;
     }
   }
@@ -97,11 +96,38 @@ new (class EnterDescriptionScene extends Scene {
       on: [["text", this.addDescription]],
     };
   }
-  askDescription(ctx) {
-    ctx.reply(SendWork.description.getDescription);
+  async askDescription(ctx) {
+    await ctx.reply(
+      SendWork.description.getDescription,
+      Markup.keyboard(["Назад"]).resize().oneTime().extra()
+    );
   }
-  addDescription(ctx) {
-    ctx.session.work.description = ctx.message.text;
-    sendWork(ctx);
+  async addDescription(ctx) {
+    if (ctx.message.text === "Назад") await ctx.scene.enter("DescriptionQuestion");
+    else{
+      ctx.session.work.description = ctx.message.text;
+      await sendWork(ctx);
+      await ctx.scene.enter("SendNextWorkQuestion");
+    }
+  }
+})();
+
+new (class SendNextWorkQuestionScene extends Scene {
+  constructor() {
+    super("SendNextWorkQuestion");
+    super.struct = {
+      enter: [[this.askNextWorkSend]],
+      on: [["text", this.takeAnswer]],
+    };
+  }
+  async askNextWorkSend(ctx) {
+    await ctx.reply(
+      "Работа успешно добавлена, найти её можно в разделе \"Мои работы\". Отправить еще одну работу?",
+      Markup.keyboard(["Да", "В главное меню"]).resize().oneTime().extra()
+    );
+  }
+  async takeAnswer(ctx) {
+    if (ctx.message.text === "Да") await ctx.scene.enter("SendWork");
+    else if (ctx.message.text === "В главное меню") await ctx.user.goMain(ctx);
   }
 })();
