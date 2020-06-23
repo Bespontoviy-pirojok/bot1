@@ -27,6 +27,36 @@ async function showToRate(ctx) {
   show.messageSize++;
 }
 
+async function correctButtonNumber(ctx) {
+  function generatedArray(ctx) {
+    let res = [];
+    const buttons = [
+      ["Предыдущая страцница", "Следующая страцница"],
+      ["Назад"],
+    ];
+    const btnCount = ctx.session.works.length || 0;
+    if (btnCount > 0 && btnCount <= 5) {
+      for (let i = 1; i <= btnCount; ++i) {
+        res.push(i.toString());
+      }
+    } else if (btnCount > 0 && btnCount <= 10) {
+      res = [[], []];
+      const separator = (btnCount / 2) | 0;
+      for (let i = 1; i < separator; ++i) {
+        res[0].push(i.toString());
+      }
+      for (let i = separator; i <= btnCount; ++i) {
+        res[1].push(i.toString());
+      }
+    }
+    res.push(buttons);
+    return res;
+  }
+  await ctx.editMessageReplyMarkup({
+    keyboard: [["Предыдущая страцница", "Следующая страцница"], ["Назад"]],
+  });
+}
+
 new (class RateScene extends Scene {
   constructor() {
     super("Rate");
@@ -45,77 +75,54 @@ new (class RateScene extends Scene {
       "Оценить чужие работы\nВыберите номер работы для оценки",
       Markup.keyboard([
         ["Предыдущая страцница", "Следующая страцница"],
-        ["Назад"]
-      ]).resize().extra()
+        ["Назад"],
+      ])
+        .resize()
+        .extra()
     );
     ctx.session.caption = [chat.id, message_id];
     const user = await ctx.base.getUser(ctx.from.id);
     ctx.session.show = { index: user.page };
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
-
-    async function correctButtonNumber(ctx){
-      function generatedArray(ctx){
-        let res = []
-        const buttons = [
-            ["Предыдущая страцница", "Следующая страцница"],
-            ["Назад"]
-        ]
-        const btnCount = ctx.session.works.length||0
-        if(btnCount > 0 && btnCount <= 5){
-          for(let i = 1; i <= btnCount; ++i){
-            res.push(i.toString())
-          }
-        } else if ( btnCount > 0 && btnCount <= 10) {
-          res = [[],[]]
-          const separator = ~~(btnCount/2);
-          for (let i = 1; i < separator; ++i){
-            res[0].push(i.toString())
-          }
-          for (let i = separator; i <= btnCount; ++i){
-            res[1].push(i.toString())
-          }
-        }
-        return res.push(buttons)
-      }
-      await ctx.editMessageReplyMarkup(
-          ctx.session.caption[0],
-          ctx.session.caption[1],
-          undefined,
-          Markup.keyboard(generatedArray(ctx))
-      )
-    }
+    correctButtonNumber(ctx);
   }
 
   async savePost(ctx) {
-    await ctx.answerCbQuery();
+    await ctx.answerCbQuery("Сохранено");
     await ctx.base.savePost(ctx.chat.id, ObjectID(ctx.match[1]));
   }
 
   async ratePost(ctx) {
     const show = ctx.session.show;
-    await ctx.answerCbQuery();
-    await ctx.editMessageReplyMarkup( //TODO: Эта штука должна отмечать что оценка выставлена
-      ctx.message.chat.id,
-      ctx.message.message_id,
-      Extra.HTML().markup((m) =>
-        m.inlineKeyboard([
+    await ctx.answerCbQuery("Вы поставили " + ctx.match[1]);
+    await ctx.editMessageReplyMarkup(
+      //TODO: Эта штука должна отмечать что оценка выставлена
+      {
+        inline_keyboard: [
           [...Array(5).keys()].map((i) =>
-            m.callbackButton(
-              (+ctx.match[1] === i + 1 ? "Выбрано " : "") + String(i + 1),
+            Markup.callbackButton(
+              (+ctx.match[1] === i + 1 ? "[" : "") +
+                String(i + 1) +
+                (+ctx.match[1] === i + 1 ? "]" : ""),
               String(i + 1) + "-" + show.array[show.index]._id
             )
           ),
-          [m.callbackButton("Сохранить", "save-" + show.array[show.index]._id)],
-        ])
-      )
+          [
+            Markup.callbackButton(
+              "Сохранить",
+              "save-" + show.array[show.index]._id
+            ),
+          ],
+        ],
+      }
     );
-    ctx.session.show.messageSize++;                        // TODO: Работает не правильно
-    await ctx.user.checkDos(ctx);
-    setTimeout(async () => {
-      ctx.telegram.deleteMessage(chat.id, message_id);     //
-      ctx.session.show.messageSize--;                      //
-    }, 3000);
+    // ctx.session.show.messageSize++; // TODO: Работает не правильно
+    // await ctx.user.checkDos(ctx);
+    // setTimeout(async () => {
+    //   ctx.telegram.deleteMessage(chat.id, message_id); //
+    //   ctx.session.show.messageSize--; //
+    // }, 3000);
     //TODO: ctx.base.putRate(match[2]/*postId*/, match[1]/*rate*/);
     //TODO: ctx.base.userRate(ctx.from.id, match[2]/*postId*/)
   }
@@ -127,7 +134,9 @@ new (class RateScene extends Scene {
       show.indexWork = +ctx.message.text - 1;
       show.array = ctx.session.works;
       if (!show.array[show.indexWork]) {
-        await ctx.reply("Работы с таким номером не существует, попробуйте заново.");
+        await ctx.reply(
+          "Работы с таким номером не существует, попробуйте заново."
+        );
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 2;
       } else await showToRate(ctx);
@@ -137,9 +146,11 @@ new (class RateScene extends Scene {
     switch (ctx.message.text) {
     case "Следующая страцница":
       user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
+      correctButtonNumber(ctx);
       break;
     case "Предыдущая страцница":
       user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
+      correctButtonNumber(ctx);
       break;
     case "Назад":
       ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
