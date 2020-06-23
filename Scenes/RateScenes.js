@@ -1,5 +1,5 @@
 const { Scene, Markup, Extra } = require("./Scenes");
-const { Works } = require("../messages.json");
+
 const { ObjectID } = require("mongodb");
 
 async function showToRate(ctx) {
@@ -8,7 +8,7 @@ async function showToRate(ctx) {
   await user.deleteLastNMessage(ctx);
   [show.index, show.indexWork] = [show.indexWork, show.index];
   ctx.session.show.messageSize = await user.sendWork(ctx);
-  ctx.base.seenPost(ctx.from.id, show.array[show.index]._id);
+  await ctx.base.seenPost(ctx.from.id, show.array[show.index]._id);
   await ctx.reply(
     "Оцените работу!",
     Extra.HTML().markup((m) =>
@@ -42,8 +42,13 @@ new (class RateScene extends Scene {
 
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
-      Works.special.Rate,
-      Markup.keyboard(Works.rate.buttons).resize().extra()
+      "Оценить чужие работы\nВыберите номер работы для оценки",
+      Markup.keyboard([
+        ["1", "2", "3", "4"],
+        ["5", "6", "7", "8"],
+        ["Предыдущая страцница", "Следующая страцница"],
+        ["Назад"]
+      ]).resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];
     const user = await ctx.base.getUser(ctx.from.id);
@@ -58,27 +63,27 @@ new (class RateScene extends Scene {
   async ratePost(ctx) {
     const show = ctx.session.show;
     await ctx.answerCbQuery();
-    // await ctx.editMessageReplyMarkup( //TODO: Эта штука должна отмечать что оценка выставлена
-    //   ctx.message.chat.id,
-    //   ctx.message.message_id,
-    //   Extra.HTML().markup((m) =>
-    //     m.inlineKeyboard([
-    //       [...Array(5).keys()].map((i) =>
-    //         m.callbackButton(
-    //           (+ctx.match[1] === i + 1 ? "Выбрано " : "") + String(i + 1),
-    //           String(i + 1) + "-" + show.array[show.index]._id
-    //         )
-    //       ),
-    //       [m.callbackButton("Сохранить", "save-" + show.array[show.index]._id)],
-    //     ])
-    //   )
-    // );
-    // ctx.session.show.messageSize++;                        // TODO: Работает не правильно
+    await ctx.editMessageReplyMarkup( //TODO: Эта штука должна отмечать что оценка выставлена
+      ctx.message.chat.id,
+      ctx.message.message_id,
+      Extra.HTML().markup((m) =>
+        m.inlineKeyboard([
+          [...Array(5).keys()].map((i) =>
+            m.callbackButton(
+              (+ctx.match[1] === i + 1 ? "Выбрано " : "") + String(i + 1),
+              String(i + 1) + "-" + show.array[show.index]._id
+            )
+          ),
+          [m.callbackButton("Сохранить", "save-" + show.array[show.index]._id)],
+        ])
+      )
+    );
+    ctx.session.show.messageSize++;                        // TODO: Работает не правильно
     await ctx.user.checkDos(ctx);
-    // setTimeout(async () => {
-    //   ctx.telegram.deleteMessage(chat.id, message_id);     //
-    //   ctx.session.show.messageSize--;                      //
-    // }, 3000);
+    setTimeout(async () => {
+      ctx.telegram.deleteMessage(chat.id, message_id);     //
+      ctx.session.show.messageSize--;                      //
+    }, 3000);
     //TODO: ctx.base.putRate(match[2]/*postId*/, match[1]/*rate*/);
     //TODO: ctx.base.userRate(ctx.from.id, match[2]/*postId*/)
   }
@@ -90,7 +95,7 @@ new (class RateScene extends Scene {
       show.indexWork = +ctx.message.text - 1;
       show.array = ctx.session.works;
       if (!show.array[show.indexWork]) {
-        await ctx.reply(Works.retry);
+        await ctx.reply("Работы с таким номером не существует, попробуйте заново.");
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 2;
       } else await showToRate(ctx);
@@ -98,13 +103,13 @@ new (class RateScene extends Scene {
     }
 
     switch (ctx.message.text) {
-    case Works.next:
+    case "Следующая страцница":
       user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
       break;
-    case Works.prev:
+    case "Предыдущая страцница":
       user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
       break;
-    case Works.back:
+    case "Назад":
       ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
       ctx.telegram.deleteMessage(...ctx.session.caption);
       await user.deleteLastNMessage(ctx);

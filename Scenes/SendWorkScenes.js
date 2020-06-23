@@ -1,13 +1,12 @@
 const { Scene, Markup } = require("./Scenes");
-const { SendWork } = require("../messages.json");
 const { ObjectID } = require("mongodb");
 
 async function sendWork(ctx) {
   const work = await ctx.base.setPost(ctx.session.work);
   await ctx.base.postedPost(ctx.from.id, work._id);
   await ctx.reply(
-    SendWork.send.again,
-    Markup.keyboard(SendWork.send.buttons).oneTime().resize().extra()
+    "Работа успешно добавлена, найти её можно в разделе \"Мои работы\".\n\nТеперь вы можете отправить ещё одну работу?",
+    Markup.keyboard(["Готово", "Назад"]).oneTime().resize().extra()
   );
   await ctx.scene.enter("SendWorkInit");
 }
@@ -21,8 +20,8 @@ new (class SendWorkScene extends Scene {
   }
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
-      SendWork.send.welcome,
-      Markup.keyboard(SendWork.send.buttons).oneTime().resize().extra()
+      "Отправьте фотографии в формате jpeg или png и нажмите кнопку готово.\nПервая фотография будет использоваться в качестве превью к вашей работе",
+      Markup.keyboard(["Готово", "Назад"]).oneTime().resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];
     await ctx.scene.enter("SendWorkInit");
@@ -60,17 +59,17 @@ new (class SendWorkInitScene extends Scene {
     const work = ctx.session.work;
 
     switch (ctx.message.text) {
-    case SendWork.send.push:
+    case "Готово":
       //  Если есть фото и их можно вместить в альбом
       if (work.photos.length > 0 && work.photos.length < 10) {
         await ctx.scene.enter("DescriptionQuestion");
       } else {
-        ctx.reply(SendWork.send.retry);
+        ctx.reply("Некоректное количество фотографий.\nДопустимо 1-10 фотографий!");
         //  Очищение локального кеша с фотками
         work.photos = [];
       }
       break;
-    case SendWork.send.back:
+    case "Назад":
       await ctx.user.goMain(ctx);
     }
   }
@@ -86,20 +85,20 @@ new (class DescriptionQuestionScene extends Scene {
   }
   async question(ctx) {
     await ctx.reply(
-      SendWork.description.welcome,
-      Markup.keyboard(SendWork.description.buttons).resize().oneTime().extra()
+        "Добавить описание?",
+      Markup.keyboard(["Да", "Нет", "Назад"]).resize().oneTime().extra()
     );
   }
 
   async main(ctx) {
     switch (ctx.message.text) {
-    case SendWork.description.yes:
+    case "Да":
       await ctx.scene.enter("EnterDescription");
       break;
-    case SendWork.description.no:
+    case "Нет":
       await sendWork(ctx);
       break;
-    case SendWork.description.back:
+    case "Назад":
       await ctx.scene.enter("SendWork");
       break;
     }
@@ -116,7 +115,7 @@ new (class EnterDescriptionScene extends Scene {
   }
   async askDescription(ctx) {
     await ctx.reply(
-      SendWork.description.getDescription,
+      "Введите описание вашей работы",
       Markup.keyboard(["Назад"]).resize().oneTime().extra()
     );
   }
