@@ -94,7 +94,7 @@ class User extends Wrapper {
     page = page || ctx.session.show.index;
     //  Получение непросмотренных постов
     const posts = await ctx.base.getNotSeenPosts(ctx.from.id),
-      perPage = 2, // Сколько превью выводим на одну страницу
+      perPage = 8, // Сколько превью выводим на одну страницу
       show = ctx.session.show,
       //  Получение старницы с постами
       works = posts.slice(perPage * page, perPage * (page + 1));

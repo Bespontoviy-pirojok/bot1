@@ -1,5 +1,6 @@
 const { Scene, Markup, Extra } = require("./Scenes");
 const { Works } = require("../messages.json");
+const { ObjectID } = require("mongodb");
 
 async function showToRate(ctx) {
   const user = ctx.user,
@@ -7,17 +8,19 @@ async function showToRate(ctx) {
   await user.deleteLastNMessage(ctx);
   [show.index, show.indexWork] = [show.indexWork, show.index];
   ctx.session.show.messageSize = await user.sendWork(ctx);
+  ctx.base.seenPost(ctx.from.id, show.array[show.index]._id);
   await ctx.reply(
     "Оцените работу!",
     Extra.HTML().markup((m) =>
-      m.inlineKeyboard(
+      m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
           m.callbackButton(
             String(i + 1),
             String(i + 1) + "-" + show.array[show.index]._id
           )
-        )
-      )
+        ),
+        [m.callbackButton("Сохранить", "save-" + show.array[show.index]._id)],
+      ])
     )
   );
   [show.index, show.indexWork] = [show.indexWork, show.index];
@@ -29,7 +32,10 @@ new (class RateScene extends Scene {
     super("Rate");
     super.struct = {
       enter: [[this.enter]],
-      action: [[/([1-5])-([\w\D]*)/, this.ratePost]],
+      action: [
+        [/([1-5])-([\w\D]*)/, this.ratePost],
+        [/save-([\w\D]*)/, this.savePost],
+      ],
       on: [["text", this.main]],
     };
   }
@@ -41,16 +47,32 @@ new (class RateScene extends Scene {
     );
     ctx.session.caption = [chat.id, message_id];
     const user = await ctx.base.getUser(ctx.from.id);
-    ctx.session.show = { index: 0 };
+    ctx.session.show = { index: user.page };
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
   }
-
-  async ratePost(ctx) {
+  async savePost(ctx) {
     await ctx.answerCbQuery();
-    const { message_id, chat } = await ctx.reply(
-      `Хуйню неси. Твоя оценка: ${ctx.match[1]}`
-    );
+    await ctx.base.savePost(ctx.chat.id, ObjectID(ctx.match[1]));
+  }
+  async ratePost(ctx) {
+    const show = ctx.session.show;
+    await ctx.answerCbQuery();
+    // await ctx.editMessageReplyMarkup( //TODO: Эта штука должна отмечать что оценка выставлена
+    //   ctx.message.chat.id,
+    //   ctx.message.message_id,
+    //   Extra.HTML().markup((m) =>
+    //     m.inlineKeyboard([
+    //       [...Array(5).keys()].map((i) =>
+    //         m.callbackButton(
+    //           (+ctx.match[1] === i + 1 ? "Выбрано " : "") + String(i + 1),
+    //           String(i + 1) + "-" + show.array[show.index]._id
+    //         )
+    //       ),
+    //       [m.callbackButton("Сохранить", "save-" + show.array[show.index]._id)],
+    //     ])
+    //   )
+    // );
     // ctx.session.show.messageSize++;                        // TODO: Работает не правильно
     await ctx.user.checkDos(ctx);
     // setTimeout(async () => {
@@ -64,7 +86,7 @@ new (class RateScene extends Scene {
   async main(ctx) {
     const user = ctx.user,
       show = ctx.session.show;
-    if (/[0-9]/.test(ctx.message.text)) {
+    if (/[1-8]/.test(ctx.message.text)) {
       show.indexWork = +ctx.message.text - 1;
       show.array = ctx.session.works;
       if (!show.array[show.indexWork]) {

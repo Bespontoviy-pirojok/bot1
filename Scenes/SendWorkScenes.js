@@ -1,5 +1,6 @@
 const { Scene, Markup } = require("./Scenes");
 const { SendWork } = require("../messages.json");
+const { ObjectID } = require("mongodb");
 
 async function sendWork(ctx) {
   const work = await ctx.base.setPost(ctx.session.work);
@@ -41,7 +42,7 @@ new (class SendWorkInitScene extends Scene {
   }
   async enter(ctx) {
     ctx.session.work = {
-      _id: null, // ID поста
+      _id: ObjectID(), // ID поста
       authId: null, // это ID пользователя, отправившего изображение
       description: null, // описание работы
       photos: [], // массив ссылок на фотографии

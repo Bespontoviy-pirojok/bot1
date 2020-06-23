@@ -83,7 +83,7 @@ class DataBase {
     return await global.DataBaseController.set("User", user);
   }
   async putUser(userId, user) {
-    console.log("putUser: ", user);
+    console.log("putUser: ", userId, user);
     return await global.DataBaseController.update(
       "User",
       { _id: userId },
@@ -102,7 +102,7 @@ class DataBase {
       )[0],
       posts = await global.DataBaseController.get("Post");
     return uniq(user.seen.concat(posts))[1]
-      .filter((obj) => obj.photos && obj.authId != userId)
+      .filter((obj) => obj.photos) //&& obj.authId != userId)
       .map((obj) => {
         return { _id: obj._id, preview: obj.photos[0] };
       });
@@ -115,16 +115,18 @@ class DataBase {
     console.log("savePost: ", userId, postId);
     const user = await this.getUser(userId);
     let uniqed = false;
-    [uniqed, user.save] = uniq(user.save.push({ _id: postId }));
+    user.saved.push({ _id: postId });
+    [uniqed, user.saved] = uniq(user.saved);
     if (uniqed) {
-      await global.DataBaseController.putUser(userId, { save: user.save });
+      await global.DataBaseController.putUser(userId, { saved: user.saved });
     }
   }
   async seenPost(userId, postId) {
     console.log("seenPost: ", userId, postId);
     const user = await global.DataBaseController.getUser(userId);
     let uniqed = false;
-    [uniqed, user.seen] = uniq(user.seen.push({ _id: postId }));
+    user.seen.push({ _id: postId });
+    [uniqed, user.seen] = uniq(user.seen);
     if (uniqed) {
       await global.DataBaseController.putUser(userId, { seen: user.seen });
     }
@@ -140,7 +142,7 @@ class DataBase {
     }
   }
   async setPost(post) {
-    console.log("putPost: ", post);
+    console.log("setPost: ", post);
     return await global.DataBaseController.set("Post", post);
   }
 }
