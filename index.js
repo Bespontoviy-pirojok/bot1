@@ -2,7 +2,6 @@
 // https://www.mindmeister.com/ru/1522778260?t=8C07mVgoEn
 
 const { token, mongo } = require("./congif.json");
-const { Main } = require("./messages.json");
 
 const { Telegraf, Markup, session, once } = require("./Scenes");
 
@@ -15,8 +14,13 @@ const user = require("./Wrapper/User").get();
 // Главная
 user.main = async (ctx) => {
   const { message_id, chat } = await ctx.reply(
-    Main.welcome,
-    Markup.keyboard(Main.buttons).resize().oneTime().extra()
+    "Бот для всей хуйни",
+    Markup.keyboard([
+      "Выложить работу",
+      "Оценить чужие работы",
+      "Посмотреть оценки своих работ",
+      "Сохраненное"
+    ]).resize().oneTime().extra()
   );
   ctx.session.caption = [chat.id, message_id];
 };
@@ -44,22 +48,22 @@ bot.on("text", async (ctx) => {
     });
   ctx.session.inited = true;
   switch (ctx.message.text) {
-  case Main.MyWorks:
+  case "Посмотреть оценки своих работ":
     ctx.telegram.deleteMessage(...ctx.session.caption);
     ctx.deleteMessage();
     await ctx.scene.enter("MyWorks");
     break;
-  case Main.Saved:
+  case "Сохраненное":
     ctx.telegram.deleteMessage(...ctx.session.caption);
     ctx.deleteMessage();
     await ctx.scene.enter("Saved");
     break;
-  case Main.SendWork:
+  case "Выложить работу":
     ctx.telegram.deleteMessage(...ctx.session.caption);
     ctx.deleteMessage();
     await ctx.scene.enter("SendWork");
     break;
-  case Main.Rate:
+  case "Оценить чужие работы":
     ctx.telegram.deleteMessage(...ctx.session.caption);
     ctx.deleteMessage();
     await ctx.scene.enter("Rate");
