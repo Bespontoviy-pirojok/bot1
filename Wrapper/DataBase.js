@@ -102,7 +102,7 @@ class DataBase {
       )[0],
       posts = await global.DataBaseController.get("Post");
     return uniq(user.seen.concat(posts))[1]
-      .filter((obj) => obj.photos) //&& obj.authId != userId)
+      .filter((obj) => obj.photos && obj.authId != userId)
       .map((obj) => {
         return { _id: obj._id, preview: obj.photos[0] };
       });

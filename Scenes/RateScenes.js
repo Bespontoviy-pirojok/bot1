@@ -66,7 +66,7 @@ new (class RateScene extends Scene {
           for(let i = 1; i <= btnCount; ++i){
             res.push(i.toString())
           }
-        } else if ( btnCount > && btnCount <= 10) {
+        } else if ( btnCount > 0 && btnCount <= 10) {
           res = [[],[]]
           const separator = ~~(btnCount/2);
           for (let i = 1; i < separator; ++i){
