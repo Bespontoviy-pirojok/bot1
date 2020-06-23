@@ -44,8 +44,6 @@ new (class RateScene extends Scene {
     const { message_id, chat } = await ctx.reply(
       "Оценить чужие работы\nВыберите номер работы для оценки",
       Markup.keyboard([
-        ["1", "2", "3", "4"],
-        ["5", "6", "7", "8"],
         ["Предыдущая страцница", "Следующая страцница"],
         ["Назад"]
       ]).resize().extra()
@@ -55,11 +53,45 @@ new (class RateScene extends Scene {
     ctx.session.show = { index: user.page };
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
+
+    async function correctButtonNumber(ctx){
+      function generatedArray(ctx){
+        let res = []
+        const buttons = [
+            ["Предыдущая страцница", "Следующая страцница"],
+            ["Назад"]
+        ]
+        const btnCount = ctx.session.works.length||0
+        if(btnCount > 0 && btnCount <= 5){
+          for(let i = 1; i <= btnCount; ++i){
+            res.push(i.toString())
+          }
+        } else if ( btnCount > && btnCount <= 10) {
+          res = [[],[]]
+          const separator = ~~(btnCount/2);
+          for (let i = 1; i < separator; ++i){
+            res[0].push(i.toString())
+          }
+          for (let i = separator; i <= btnCount; ++i){
+            res[1].push(i.toString())
+          }
+        }
+        return res.push(buttons)
+      }
+      await ctx.editMessageReplyMarkup(
+          ctx.session.caption[0],
+          ctx.session.caption[1],
+          undefined,
+          Markup.keyboard(generatedArray(ctx))
+      )
+    }
   }
+
   async savePost(ctx) {
     await ctx.answerCbQuery();
     await ctx.base.savePost(ctx.chat.id, ObjectID(ctx.match[1]));
   }
+
   async ratePost(ctx) {
     const show = ctx.session.show;
     await ctx.answerCbQuery();
