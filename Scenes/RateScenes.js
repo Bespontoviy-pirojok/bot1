@@ -52,9 +52,10 @@ async function correctButtonNumber(ctx) {
     res.push(buttons);
     return res;
   }
-  await ctx.editMessageReplyMarkup({
-    keyboard: [["Предыдущая страцница", "Следующая страцница"], ["Назад"]],
-  });
+  // TODO: i need this shhhhhhhhhhh working
+  // await ctx.editMessageReplyMarkup({
+  //   keyboard: [["Предыдущая страцница", "Следующая страцница"], ["Назад"]],
+  // });
 }
 
 new (class RateScene extends Scene {
@@ -96,27 +97,24 @@ new (class RateScene extends Scene {
   async ratePost(ctx) {
     const show = ctx.session.show;
     await ctx.answerCbQuery("Вы поставили " + ctx.match[1]);
-    await ctx.editMessageReplyMarkup(
-      //TODO: Эта штука должна отмечать что оценка выставлена
-      {
-        inline_keyboard: [
-          [...Array(5).keys()].map((i) =>
-            Markup.callbackButton(
-              (+ctx.match[1] === i + 1 ? "[" : "") +
-                String(i + 1) +
-                (+ctx.match[1] === i + 1 ? "]" : ""),
-              String(i + 1) + "-" + show.array[show.index]._id
-            )
+    await ctx.editMessageReplyMarkup({
+      inline_keyboard: [
+        [...Array(5).keys()].map((i) =>
+          Markup.callbackButton(
+            (+ctx.match[1] === i + 1 ? "[" : "") +
+              String(i + 1) +
+              (+ctx.match[1] === i + 1 ? "]" : ""),
+            String(i + 1) + "-" + show.array[show.index]._id
+          )
+        ),
+        [
+          Markup.callbackButton(
+            "Сохранить",
+            "save-" + show.array[show.index]._id
           ),
-          [
-            Markup.callbackButton(
-              "Сохранить",
-              "save-" + show.array[show.index]._id
-            ),
-          ],
         ],
-      }
-    );
+      ],
+    });
     // ctx.session.show.messageSize++; // TODO: Работает не правильно
     // await ctx.user.checkDos(ctx);
     // setTimeout(async () => {

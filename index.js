@@ -19,8 +19,11 @@ user.main = async (ctx) => {
       "Выложить работу",
       "Оценить чужие работы",
       "Посмотреть оценки своих работ",
-      "Сохраненное"
-    ]).resize().oneTime().extra()
+      "Сохраненное",
+    ])
+      .resize()
+      .oneTime()
+      .extra()
   );
   ctx.session.caption = [chat.id, message_id];
 };
@@ -38,6 +41,7 @@ bot.use(
 // Доступные на главной команды
 bot.start(user.main);
 bot.on("text", async (ctx) => {
+  if (!ctx.session.caption) await user.main(ctx);
   if (!ctx.session.inited && !(await ctx.base.getUser(ctx.from.id)))
     await ctx.base.setUser({
       _id: ctx.from.id,
