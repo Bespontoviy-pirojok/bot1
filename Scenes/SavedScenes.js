@@ -1,5 +1,5 @@
 const { Scene, Markup } = require("./Scenes");
-const { Works } = require("../messages.json");
+
 
 new (class SavedScene extends Scene {
   constructor() {
@@ -12,8 +12,8 @@ new (class SavedScene extends Scene {
 
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
-      Works.special.Saved,
-      Markup.keyboard(Works.buttons).resize().extra()
+        "Сохраненные",
+      Markup.keyboard(["Следующая страцница", "Предыдущая страцница", "Назад"]).resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];
     //  Получение объекта пользователя из базы
@@ -32,19 +32,19 @@ new (class SavedScene extends Scene {
     const user = ctx.user;
 
     switch (ctx.message.text) {
-    case Works.next:
+    case "Следующая страцница":
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendWork);
       break;
-    case Works.prev:
+    case "Предыдущая страцница":
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendWork);
       break;
-    case Works.back:
+    case "Назад":
       ctx.telegram.deleteMessage(...ctx.session.caption);
       await user.deleteLastNMessage(ctx);
       await user.goMain(ctx);
       break;
     default:
-      ctx.reply(Works.default);
+      ctx.reply("Хуйню не неси");
       ctx.session.show.messageSize++;
     }
   }

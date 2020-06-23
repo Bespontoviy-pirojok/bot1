@@ -21,9 +21,9 @@ class User extends Wrapper {
     };
   }
   //  Типиизрует токены фотографий для кормления api телеги
-  typedAsPhoto(arr) {
-    return arr.map((elem) => {
-      return { type: "photo", media: elem };
+  typedAsPhoto(arr, desc) {
+    return arr.map((elem, index) => {
+      return index === 0 ? { type: "photo", media: elem, caption: desc} : { type: "photo", media: elem };
     });
   }
   //  Смещения указателя show.index на shift в пределах show.size
@@ -76,13 +76,9 @@ class User extends Wrapper {
       return 1;
     }
     let size = post.photos.length;
-    if (post.description !== null) {
-      ++size;
-      await ctx.reply(post.description);
-    }
     await ctx.telegram.sendMediaGroup(
       ctx.from.id,
-      this.typedAsPhoto(post.photos)
+      this.typedAsPhoto(post.photos, post.description)
     );
     ctx.session.show.messageSize = size;
     return size;
