@@ -11,10 +11,11 @@ new (class SavedScene extends Scene {
   }
 
   async enter(ctx) {
-    await ctx.reply(
+    const { message_id, chat } = await ctx.reply(
       Works.special.Saved,
       Markup.keyboard(Works.buttons).resize().extra()
     );
+    ctx.session.caption = [chat.id, message_id];
     //  Получение объекта пользователя из базы
     const saved = (await ctx.base.getUser(ctx.from.id)).saved;
     //  Индексация кеша
@@ -32,16 +33,19 @@ new (class SavedScene extends Scene {
 
     switch (ctx.message.text) {
     case Works.next:
-      user.updateWith(user.shiftIndex(ctx, -1), user.sendWork);
+      await user.updateWith(user.shiftIndex(ctx, -1), user.sendWork);
       break;
     case Works.prev:
-      user.updateWith(user.shiftIndex(ctx, 1), user.sendWork);
+      await user.updateWith(user.shiftIndex(ctx, 1), user.sendWork);
       break;
     case Works.back:
-      user.goMain(ctx);
+      ctx.telegram.deleteMessage(...ctx.session.caption);
+      await user.deleteLastNMessage(ctx);
+      await user.goMain(ctx);
       break;
     default:
       ctx.reply(Works.default);
+      ctx.session.show.messageSize++;
     }
   }
 })();

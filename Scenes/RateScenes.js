@@ -6,7 +6,7 @@ async function showToRate(ctx) {
     show = ctx.session.show;
   await user.deleteLastNMessage(ctx);
   [show.index, show.indexWork] = [show.indexWork, show.index];
-  await user.sendWork(ctx);
+  ctx.session.show.messageSize = await user.sendWork(ctx);
   await ctx.reply(
     "Оцените работу!",
     Extra.HTML().markup((m) =>
@@ -35,12 +35,14 @@ new (class RateScene extends Scene {
   }
 
   async enter(ctx) {
-    await ctx.reply(
+    const { message_id, chat } = await ctx.reply(
       Works.special.Rate,
       Markup.keyboard(Works.rate.buttons).resize().extra()
     );
+    ctx.session.caption = [chat.id, message_id];
+    const user = await ctx.base.getUser(ctx.from.id);
     ctx.session.show = { index: 0 };
-    await ctx.user.sendWorksGroup(ctx);
+    ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
   }
 
@@ -49,12 +51,12 @@ new (class RateScene extends Scene {
     const { message_id, chat } = await ctx.reply(
       `Хуйню неси. Твоя оценка: ${ctx.match[1]}`
     );
-    ctx.session.show.messageSize++;
+    // ctx.session.show.messageSize++;                        // TODO: Работает не правильно
     await ctx.user.checkDos(ctx);
-    setTimeout(() => {
-      ctx.telegram.deleteMessage(chat.id, message_id);
-      ctx.session.show.messageSize--;
-    }, 3000);
+    // setTimeout(async () => {
+    //   ctx.telegram.deleteMessage(chat.id, message_id);     //
+    //   ctx.session.show.messageSize--;                      //
+    // }, 3000);
     //TODO: ctx.base.putRate(match[2]/*postId*/, match[1]/*rate*/);
     //TODO: ctx.base.userRate(ctx.from.id, match[2]/*postId*/)
   }
@@ -66,7 +68,7 @@ new (class RateScene extends Scene {
       show.indexWork = +ctx.message.text - 1;
       show.array = ctx.session.works;
       if (!show.array[show.indexWork]) {
-        ctx.reply(Works.retry);
+        await ctx.reply(Works.retry);
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 2;
       } else await showToRate(ctx);
@@ -81,6 +83,9 @@ new (class RateScene extends Scene {
       user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
       break;
     case Works.back:
+      ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
+      ctx.telegram.deleteMessage(...ctx.session.caption);
+      await user.deleteLastNMessage(ctx);
       await user.goMain(ctx);
       break;
     }

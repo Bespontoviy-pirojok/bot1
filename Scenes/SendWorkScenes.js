@@ -4,11 +4,33 @@ const { SendWork } = require("../messages.json");
 async function sendWork(ctx) {
   const work = await ctx.base.setPost(ctx.session.work);
   await ctx.base.postedPost(ctx.from.id, work._id);
+  await ctx.reply(
+    SendWork.send.again,
+    Markup.keyboard(SendWork.send.buttons).oneTime().resize().extra()
+  );
+  await ctx.scene.enter("SendWorkInit");
 }
 
 new (class SendWorkScene extends Scene {
   constructor() {
     super("SendWork");
+    super.struct = {
+      enter: [[this.enter]],
+    };
+  }
+  async enter(ctx) {
+    const { message_id, chat } = await ctx.reply(
+      SendWork.send.welcome,
+      Markup.keyboard(SendWork.send.buttons).oneTime().resize().extra()
+    );
+    ctx.session.caption = [chat.id, message_id];
+    await ctx.scene.enter("SendWorkInit");
+  }
+})();
+
+new (class SendWorkInitScene extends Scene {
+  constructor() {
+    super("SendWorkInit");
     super.struct = {
       enter: [[this.enter]],
       on: [
@@ -18,10 +40,6 @@ new (class SendWorkScene extends Scene {
     };
   }
   async enter(ctx) {
-    await ctx.reply(
-      SendWork.send.welcome,
-      Markup.keyboard(SendWork.send.buttons).oneTime().resize().extra()
-    );
     ctx.session.work = {
       _id: null, // ID поста
       authId: null, // это ID пользователя, отправившего изображение
@@ -30,7 +48,7 @@ new (class SendWorkScene extends Scene {
     };
   }
 
-  async addPhoto(ctx) {
+  addPhoto(ctx) {
     const work = ctx.session.work; //  Получение работ из кеша
     work.authId = ctx.from.id; //  Id пользователя
     work.photos = work.photos || [];
@@ -79,7 +97,6 @@ new (class DescriptionQuestionScene extends Scene {
       break;
     case SendWork.description.no:
       await sendWork(ctx);
-      await ctx.scene.enter("SendNextWorkQuestion");
       break;
     case SendWork.description.back:
       await ctx.scene.enter("SendWork");
@@ -103,31 +120,11 @@ new (class EnterDescriptionScene extends Scene {
     );
   }
   async addDescription(ctx) {
-    if (ctx.message.text === "Назад") await ctx.scene.enter("DescriptionQuestion");
-    else{
+    if (ctx.message.text === "Назад")
+      await ctx.scene.enter("DescriptionQuestion");
+    else {
       ctx.session.work.description = ctx.message.text;
       await sendWork(ctx);
-      await ctx.scene.enter("SendNextWorkQuestion");
     }
-  }
-})();
-
-new (class SendNextWorkQuestionScene extends Scene {
-  constructor() {
-    super("SendNextWorkQuestion");
-    super.struct = {
-      enter: [[this.askNextWorkSend]],
-      on: [["text", this.takeAnswer]],
-    };
-  }
-  async askNextWorkSend(ctx) {
-    await ctx.reply(
-      "Работа успешно добавлена, найти её можно в разделе \"Мои работы\". Отправить еще одну работу?",
-      Markup.keyboard(["Да", "В главное меню"]).resize().oneTime().extra()
-    );
-  }
-  async takeAnswer(ctx) {
-    if (ctx.message.text === "Да") await ctx.scene.enter("SendWork");
-    else if (ctx.message.text === "В главное меню") await ctx.user.goMain(ctx);
   }
 })();

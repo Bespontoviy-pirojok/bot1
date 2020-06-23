@@ -4,20 +4,21 @@
 const { token, mongo } = require("./congif.json");
 const { Main } = require("./messages.json");
 
-const { Telegraf, Markup, session } = require("./Scenes");
+const { Telegraf, Markup, session, once } = require("./Scenes");
 
 // Роутер бота
 const bot = new Telegraf(token);
 // Обработка обращений к базе данных
-const base = require("./Wrapper/DataBase").get(mongo);
+const base = require("./Wrapper/DataBase").get();
 // Обработка упращённых обращений
 const user = require("./Wrapper/User").get();
 // Главная
 user.main = async (ctx) => {
-  ctx.reply(
+  const { message_id, chat } = await ctx.reply(
     Main.welcome,
     Markup.keyboard(Main.buttons).resize().oneTime().extra()
   );
+  ctx.session.caption = [chat.id, message_id];
 };
 
 // Устанавливаем обработчики
@@ -39,27 +40,40 @@ bot.on("text", async (ctx) => {
       saved: [],
       posted: [],
       seen: [],
+      page: 0,
     });
   ctx.session.inited = true;
   switch (ctx.message.text) {
   case Main.MyWorks:
-    ctx.scene.enter("MyWorks");
+    ctx.telegram.deleteMessage(...ctx.session.caption);
+    ctx.deleteMessage();
+    await ctx.scene.enter("MyWorks");
     break;
   case Main.Saved:
-    ctx.scene.enter("Saved");
+    ctx.telegram.deleteMessage(...ctx.session.caption);
+    ctx.deleteMessage();
+    await ctx.scene.enter("Saved");
     break;
   case Main.SendWork:
-    ctx.scene.enter("SendWork");
+    ctx.telegram.deleteMessage(...ctx.session.caption);
+    ctx.deleteMessage();
+    await ctx.scene.enter("SendWork");
     break;
   case Main.Rate:
-    ctx.scene.enter("Rate");
+    ctx.telegram.deleteMessage(...ctx.session.caption);
+    ctx.deleteMessage();
+    await ctx.scene.enter("Rate");
     break;
   }
 });
 
-global.Controller.on("DataBaseConnected", async () => {
+global.Controller.once("Launch", async () => {
+  global.Controller.emit("DataBaseConnect", "april", mongo);
+  await once(global.Controller, "DataBaseConnected");
   await bot.launch();
   console.log(await global.DataBaseController.get("Post"));
   console.log(await global.DataBaseController.get("User"));
-  global.console.log("Listening...");
+  console.log("Listening...");
 });
+
+global.Controller.emit("Launch");

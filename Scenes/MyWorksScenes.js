@@ -11,10 +11,11 @@ new (class MyWorksScene extends Scene {
   }
 
   async enter(ctx) {
-    await ctx.reply(
+    const { message_id, chat } = await ctx.reply(
       Works.special.MyWorks,
       Markup.keyboard(Works.buttons).resize().extra()
     );
+    ctx.session.caption = [chat.id, message_id];
     const posted = (await ctx.base.getUser(ctx.from.id)).posted;
     //  Индексация кеша
     ctx.session.show = {
@@ -35,6 +36,8 @@ new (class MyWorksScene extends Scene {
       user.updateWith(user.shiftIndex(ctx, 1), user.sendWork);
       break;
     case Works.back:
+      ctx.telegram.deleteMessage(...ctx.session.caption);
+      await user.deleteLastNMessage(ctx);
       await user.goMain(ctx);
       break;
     default:

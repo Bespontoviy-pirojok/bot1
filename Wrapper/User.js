@@ -3,6 +3,8 @@ const Wrapper = require("./Wrapper");
 class User extends Wrapper {
   constructor() {
     super();
+    //  Колбэк корневой сцены - задаётся вручную
+    this.main = async () => {};
   }
   //  Для удобного экспорта через new
   static get() {
@@ -27,8 +29,13 @@ class User extends Wrapper {
   //  Смещения указателя show.index на shift в пределах show.size
   shiftIndex(ctx, shift) {
     const show = ctx.session.show;
-    if (show.index === "-1") return "-1"; // -1, если нечего индексировать
-    show.index = (show.index + ((show.size + shift) % show.size)) % show.size; //  Само смещение
+    if (show.index !== -1) {
+      // -1, если нечего индексировать
+      show.index = (show.index + ((show.size + shift) % show.size)) % show.size; //  Само смещение
+    }
+    if (show.index.toString() === "NaN") {
+      show.index = 0;
+    }
     return ctx;
   }
   // Обновление показываемого пользователю
@@ -58,8 +65,8 @@ class User extends Wrapper {
     const show = ctx.session.show,
       posts = show.array;
     postId =
-      postId || (posts && posts[show.index] && posts[show.index]._id) || "-1";
-    if (postId === "-1") {
+      postId || (posts && posts[show.index] && posts[show.index]._id) || -1;
+    if (postId === -1) {
       ctx.reply("Здесь пока ничего нет");
       return 1;
     }
@@ -87,21 +94,33 @@ class User extends Wrapper {
     page = page || ctx.session.show.index;
     //  Получение непросмотренных постов
     const posts = await ctx.base.getNotSeenPosts(ctx.from.id),
-      perPage = 3, // Сколько превью выводим на одну страницу
+      perPage = 2, // Сколько превью выводим на одну страницу
       show = ctx.session.show,
       //  Получение старницы с постами
       works = posts.slice(perPage * page, perPage * (page + 1));
+    // Ксли нет ничего нового
+    if (works.length === 0) {
+      show.messageSize = 1;
+      ctx.reply("Пусто...");
+      return 1;
+    }
     //  Отправка превьюшек полльхователю
-    ctx.telegram.sendMediaGroup(
-      ctx.from.id,
-      this.typedAsPhoto(works.map((it) => it.preview))
-    );
-    //  Сколько места занимает страница
-    show.messageSize = works.length;
+    await ctx.telegram
+      .sendMediaGroup(
+        ctx.from.id,
+        this.typedAsPhoto(works.map((it) => it.preview))
+      )
+      .catch(async (e) => {
+        console.log(e.on.payload);
+        works.length = 1;
+        await ctx.reply("error");
+      });
     //  Количество страниц
     show.size = ((posts.length + perPage - 1) / perPage) | 0;
     //  Кешируем работы
     ctx.session.works = works;
+    //  Сколько места занимает страница
+    return works.length;
   }
 
   //  Корневая сцена
@@ -109,8 +128,6 @@ class User extends Wrapper {
     await ctx.scene.leave();
     await this.main(ctx);
   }
-  //  Колбэк корневой сцены - задаётся вручную
-  main = async (ctx) => {};
 }
 
 module.exports = User;

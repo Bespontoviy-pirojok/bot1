@@ -1,36 +1,36 @@
 function uniq(a) {
-  let prims = { boolean: {}, number: {}, string: {} },
-    objs = [];
-
-  const out = a.filter(function (item) {
-    const type = typeof item;
-    if (type in prims)
-      return prims[type].hasOwnProperty(item) // TODO: Что-то lint'у тут не нравится
-        ? false
-        : (prims[type][item] = true);
-    else return objs.indexOf(item) >= 0 ? false : objs.push(item);
-  });
+  let prims = new Map(),
+    out = [],
+    j = 0;
+  for (let e of a) {
+    if (!prims[e._id]) {
+      out[j++] = e;
+      prims[e._id] = true;
+    }
+  }
   return [out.length === a.length, out];
 }
 
 class DataBase {
-  constructor(config) {
+  constructor() {
+    global.DataBaseController = this;
     this.mongodb = require("mongodb");
-    this.connect(config);
+    global.Controller.once("DataBaseConnect", this.connect);
   }
-  connect(config) {
-    this.mongodb.MongoClient(...config).connect((err, client) => {
-      if (err !== null) {
-        global.Controller.emit("Error", err);
-        return;
-      }
-      global.DataBaseController = this;
-      global.DataBase = client.db("april");
-      global.Controller.emit("DataBaseConnected");
-    });
+  connect(name, config) {
+    global.DataBaseController.mongodb
+      .MongoClient(...config)
+      .connect((err, client) => {
+        if (err !== null) {
+          global.Controller.emit("Error", err);
+          return;
+        }
+        global.DataBase = client.db(name);
+        global.Controller.emit("DataBaseConnected");
+      });
   }
-  static get(config) {
-    return new DataBase(config);
+  static get() {
+    return new DataBase();
   }
   middleware() {
     return (ctx, next) => {
@@ -76,79 +76,40 @@ class DataBase {
   }
   async getUser(userId) {
     console.log("getUser: ", userId);
-    return (await this.get("User", { _id: userId }))[0];
-    // return {
-    //   _id: userId,
-    //   saved: [{ _id: "1" }, { _id: "3" }, { _id: "2" }, { _id: "10" }], // [],
-    //   posted: [{ _id: "1" }, { _id: "4" }],
-    //   seen: [{ _id: "2" }],
-    // };
+    return (await global.DataBaseController.get("User", { _id: userId }))[0];
   }
   async setUser(user) {
     console.log("putUser: ", user);
-    return this.set("User", user);
+    return await global.DataBaseController.set("User", user);
   }
   async putUser(userId, user) {
     console.log("putUser: ", user);
-    return this.update("User", { _id: userId }, user);
+    return await global.DataBaseController.update(
+      "User",
+      { _id: userId },
+      user
+    );
   }
   async getPost(postId) {
     console.log("getPost: ", postId);
-    return (await this.get("Post", { _id: postId }))[0];
-    // if (postId < 0 || postId > 10) return undefined;
-    // return postId !== "3"
-    //   ? {
-    //     _id: postId,
-    //     authId: 430830139,
-    //     description: "Осьминог хули id:" + postId,
-    //     photos: [
-    //       "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
-    //       "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
-    //     ],
-    //   }
-    //   : {
-    //     _id: postId,
-    //     authId: 430830139,
-    //     description: "Осьминог хули id:" + postId,
-    //     photos: [
-    //       "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
-    //     ],
-    //   };
+    return (await global.DataBaseController.get("Post", { _id: postId }))[0];
   }
 
   async getNotSeenPosts(userId) {
     console.log("getNotSeenPosts: ", userId);
-    return [
-      {
-        _id: "1",
-        preview:
-          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
-      },
-      {
-        _id: "3",
-        preview:
-          "AgACAgIAAxkBAAIFYV7mLeS22ZUnlXAgbU2o8JS7MhXcAAK1rTEbiIgpSzOESQRySxAcJHW5ky4AAwEAAwIAA3kAA7gsAQABGgQ",
-      },
-      {
-        _id: "4",
-        preview:
-          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
-      },
-      {
-        _id: "5",
-        preview:
-          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
-      },
-      {
-        _id: "6",
-        preview:
-          "AgACAgIAAxkBAAIFYl7mLeTsVIMudGD-bp-Ir9Kjj-7lAALGrTEbiIgpS3XiqRxWbxha9vJNkS4AAwEAAwIAA3kAA2C3BAABGgQ",
-      },
-    ];
+    const user = (
+        await global.DataBaseController.get("User", { _id: userId })
+      )[0],
+      posts = await global.DataBaseController.get("Post");
+    return uniq(user.seen.concat(posts))[1]
+      .filter((obj) => obj.photos && obj.authId != userId)
+      .map((obj) => {
+        return { _id: obj._id, preview: obj.photos[0] };
+      });
   }
   async deletePost(postId) {
     console.log("deletePost: ", postId);
-    return await this.remove("Post", { _id: postId });
+    return await global.DataBaseController.remove("Post", { _id: postId });
   }
   async savePost(userId, postId) {
     console.log("savePost: ", userId, postId);
@@ -156,21 +117,21 @@ class DataBase {
     let uniqed = false;
     [uniqed, user.save] = uniq(user.save.push({ _id: postId }));
     if (uniqed) {
-      await this.putUser(userId, { save: user.save });
+      await global.DataBaseController.putUser(userId, { save: user.save });
     }
   }
   async seenPost(userId, postId) {
     console.log("seenPost: ", userId, postId);
-    const user = await this.getUser(userId);
+    const user = await global.DataBaseController.getUser(userId);
     let uniqed = false;
     [uniqed, user.seen] = uniq(user.seen.push({ _id: postId }));
     if (uniqed) {
-      await this.putUser(userId, { seen: user.seen });
+      await global.DataBaseController.putUser(userId, { seen: user.seen });
     }
   }
   async postedPost(userId, postId) {
     console.log("postedPost: ", userId, postId);
-    const user = await this.getUser(userId);
+    const user = await global.DataBaseController.getUser(userId);
     let uniqed = false;
     user.posted.push({ _id: postId });
     [uniqed, user.posted] = uniq(user.posted);
@@ -180,7 +141,7 @@ class DataBase {
   }
   async setPost(post) {
     console.log("putPost: ", post);
-    return await this.set("Post", post);
+    return await global.DataBaseController.set("Post", post);
   }
 }
 
