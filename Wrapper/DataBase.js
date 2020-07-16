@@ -145,6 +145,10 @@ class DataBase {
     console.log("setPost: ", post);
     return await global.DataBaseController.set("Post", post);
   }
+  async putRate(id, postId, rate)
+  {
+    
+  }
 }
 
 module.exports = DataBase;

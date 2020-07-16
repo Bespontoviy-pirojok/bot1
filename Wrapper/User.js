@@ -55,7 +55,9 @@ class User extends Wrapper {
      */
     while (n--) {
       //  Само удадение
-      if ((await ctx.deleteMessage().catch(() => -1)) === -1) break;
+      // TODO: Как попытка исправления флекса
+      ctx.deleteMessage().catch(); 
+      // if ((await ctx.deleteMessage().catch(() => -1)) === -1) break;
       ctx.update.message.message_id--;
     }
     this.free(ctx); //  Конец сложных запросов, можно разжать булки

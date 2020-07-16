@@ -95,6 +95,7 @@ new (class RateScene extends Scene {
   }
 
   async ratePost(ctx) {
+    if (!ctx.match[1] || !ctx.match[2]) return;
     const show = ctx.session.show;
     await ctx.answerCbQuery("Вы поставили " + ctx.match[1]);
     await ctx.editMessageReplyMarkup({
@@ -115,14 +116,7 @@ new (class RateScene extends Scene {
         ],
       ],
     });
-    // ctx.session.show.messageSize++; // TODO: Работает не правильно
-    // await ctx.user.checkDos(ctx);
-    // setTimeout(async () => {
-    //   ctx.telegram.deleteMessage(chat.id, message_id); //
-    //   ctx.session.show.messageSize--; //
-    // }, 3000);
-    //TODO: ctx.base.putRate(match[2]/*postId*/, match[1]/*rate*/);
-    //TODO: ctx.base.userRate(ctx.from.id, match[2]/*postId*/)
+    ctx.base.putRate(ctx.from.id, ctx.match[2]/*postId*/, ctx.match[1]/*rate*/);
   }
 
   async main(ctx) {
