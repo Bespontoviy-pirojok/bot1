@@ -23,7 +23,7 @@ class User extends Wrapper {
   //  Типиизрует токены фотографий для кормления api телеги
   typedAsPhoto(arr, desc) {
     return arr.map((elem, index) => {
-      return index === 0 ? { type: "photo", media: elem, caption: desc} : { type: "photo", media: elem };
+      return index === 0 ? { type: "photo", media: elem, caption: desc } : { type: "photo", media: elem };
     });
   }
   //  Смещения указателя show.index на shift в пределах show.size
@@ -55,7 +55,7 @@ class User extends Wrapper {
      */
     while (n--) {
       //  Само удадение
-      // TODO: Как попытка исправления флекса
+      // TODO: Как попытка исправления флекса нужно переделать через что-то async
       ctx.deleteMessage().catch(); 
       // if ((await ctx.deleteMessage().catch(() => -1)) === -1) break;
       ctx.update.message.message_id--;
@@ -70,17 +70,28 @@ class User extends Wrapper {
       postId || (posts && posts[show.index] && posts[show.index]._id) || -1;
     if (postId === -1) {
       ctx.reply("Здесь пока ничего нет");
+      ctx.session.show.messageSize = 1;
       return 1;
     }
     const post = await ctx.base.getPost(postId);
     if (post === undefined) {
       ctx.reply("Пост удалён");
+      ctx.session.show.messageSize = 1;
       return 1;
+    }
+    // Дополняем описание информацией об оценках
+    let description = post.description || "";
+    if (post.authId === ctx.from.id) {
+      let rate = ctx.base.countRate(post);
+      if (rate === 0.0)
+        description += "\nПока никто не оценил...";
+      else 
+        description += "\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length;
     }
     let size = post.photos.length;
     await ctx.telegram.sendMediaGroup(
       ctx.from.id,
-      this.typedAsPhoto(post.photos, post.description)
+      this.typedAsPhoto(post.photos, description)
     );
     ctx.session.show.messageSize = size;
     return size;

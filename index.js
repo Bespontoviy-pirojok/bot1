@@ -81,7 +81,7 @@ global.Controller.once("Launch", async () => {
   await bot.launch();
   console.log(await global.DataBaseController.get("Post"));         // For debug
   console.log(await global.DataBaseController.get("User"));         //
-  await global.DataBaseController.putUser(430830139, { seen: [] }); //
+  for (let id of [711071113, 430830139, 430830139]) await global.DataBaseController.putUser(id, { seen: [] }); //
   console.log("Listening...");
 });
 

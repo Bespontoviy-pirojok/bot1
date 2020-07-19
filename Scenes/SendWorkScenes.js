@@ -45,6 +45,7 @@ new (class SendWorkInitScene extends Scene {
       authId: null, // это ID пользователя, отправившего изображение
       description: null, // описание работы
       photos: [], // массив ссылок на фотографии
+      rates: {},
     };
   }
 
@@ -85,7 +86,7 @@ new (class DescriptionQuestionScene extends Scene {
   }
   async question(ctx) {
     await ctx.reply(
-        "Добавить описание?",
+      "Добавить описание?",
       Markup.keyboard(["Да", "Нет", "Назад"]).resize().oneTime().extra()
     );
   }

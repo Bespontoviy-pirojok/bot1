@@ -1,3 +1,5 @@
+const { ObjectID } = require("mongodb");
+
 function uniq(a) {
   let prims = new Map(),
     out = [],
@@ -9,6 +11,11 @@ function uniq(a) {
     }
   }
   return [out.length === a.length, out];
+}
+
+function average(nums) {
+  if (nums.length === 0) return 0.0;
+  return nums.reduce((a, b) => (+a + +b)) / nums.length;
 }
 
 class DataBase {
@@ -90,14 +97,22 @@ class DataBase {
       user
     );
   }
+  async putPost(postId, post) {
+    console.log("putPost: ", postId, post);
+    return await global.DataBaseController.update(
+      "Post",
+      { _id: ObjectID(postId) },
+      post
+    );
+  }
   async getPost(postId) {
     console.log("getPost: ", postId);
-    return (await global.DataBaseController.get("Post", { _id: postId }))[0];
+    return (await global.DataBaseController.get("Post", { _id: ObjectID(postId) }))[0];
   }
 
   async getNotSeenPosts(userId) {
     console.log("getNotSeenPosts: ", userId);
-    const user = (
+    let user = (
         await global.DataBaseController.get("User", { _id: userId })
       )[0],
       posts = await global.DataBaseController.get("Post");
@@ -113,7 +128,7 @@ class DataBase {
   }
   async savePost(userId, postId) {
     console.log("savePost: ", userId, postId);
-    const user = await this.getUser(userId);
+    let user = await this.getUser(userId);
     let uniqed = false;
     user.saved.push({ _id: postId });
     [uniqed, user.saved] = uniq(user.saved);
@@ -123,7 +138,7 @@ class DataBase {
   }
   async seenPost(userId, postId) {
     console.log("seenPost: ", userId, postId);
-    const user = await global.DataBaseController.getUser(userId);
+    let user = await global.DataBaseController.getUser(userId);
     let uniqed = false;
     user.seen.push({ _id: postId });
     [uniqed, user.seen] = uniq(user.seen);
@@ -145,9 +160,26 @@ class DataBase {
     console.log("setPost: ", post);
     return await global.DataBaseController.set("Post", post);
   }
+  countRate(post)
+  {
+    console.log("countRate: ", post);
+    post.rates = post.rates || {};
+    return average(Object.values(post.rates));
+  }
+  async getRate(postId)
+  {
+    console.log("getRate: ", postId);
+    let post = await global.DataBaseController.getPost(postId);
+    return this.countRate(post);
+  }
   async putRate(id, postId, rate)
   {
-    
+    console.log("putRate: ", id, postId, rate);
+    let post = await global.DataBaseController.getPost(postId);
+    if (!post) return;
+    post.rates = post.rates || {};
+    post.rates[id] = rate;
+    await global.DataBaseController.putPost(post._id, { rates: post.rates });
   }
 }
 
