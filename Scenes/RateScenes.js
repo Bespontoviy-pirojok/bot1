@@ -28,9 +28,9 @@ async function showToRate(ctx) {
 }
 
 var buttonsArray = [
-    ["Предыдущая страцница", "Следующая страцница"],
-    ["Назад"],
-  ];
+  ["Предыдущая страцница", "Следующая страцница"],
+  ["Назад"],
+];
 
 function photoRateButtonsGenerator(btnCount){
   let res = [];
@@ -56,13 +56,18 @@ function fullButtonsMarkup(btnCount){
   if (btnCount<=5){
     res.push(photoRateButtonsGenerator(btnCount));
   } else {
-    photoRateButtonsArrays = photoRateButtonsGenerator(btnCount);
+    let photoRateButtonsArrays = photoRateButtonsGenerator(btnCount);
     res.push(photoRateButtonsArrays[0]);
     res.push(photoRateButtonsArrays[1]);
   }
   res.push(buttonsArray[0]);
   res.push(buttonsArray[1]);
   return res;
+}
+
+correctButtonNumber(ctx) {
+  // TODO: здесь нужно заменить сраный маркап на
+  fullButtonsMarkup((ctx.session.works || []).lenght)
 }
 
 new (class RateScene extends Scene {
@@ -81,7 +86,7 @@ new (class RateScene extends Scene {
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
       "Оценить чужие работы\nВыберите номер работы для оценки",
-      Markup.keyboard(fullButtonsMarkup(6))
+      Markup.keyboard(fullButtonsMarkup(0))
         .resize()
         .extra()
     );
@@ -90,6 +95,7 @@ new (class RateScene extends Scene {
     ctx.session.show = { index: user.page };
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
+    correctButtonNumber(ctx);
   }
 
   async savePost(ctx) {
