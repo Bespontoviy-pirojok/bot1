@@ -65,7 +65,7 @@ function fullButtonsMarkup(btnCount){
   return res;
 }
 
-correctButtonNumber(ctx) {
+function correctButtonNumber(ctx) {
   // TODO: здесь нужно заменить сраный маркап на
   fullButtonsMarkup((ctx.session.works || []).lenght)
 }
