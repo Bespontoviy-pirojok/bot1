@@ -1,4 +1,4 @@
-const { Scene, Markup, Extra, Telegraf} = require("./Scenes");
+const { Scene, Markup, Extra} = require("./Scenes");
 
 const { ObjectID } = require("mongodb");
 
@@ -53,26 +53,23 @@ function photoRateButtonsGenerator(btnCount){
 
 function fullButtonsMarkup(btnCount){
   let res = [];
-  if (btnCount<=5){
-    res.push(photoRateButtonsGenerator(btnCount));
-  } else {
-    let photoRateButtonsArrays = photoRateButtonsGenerator(btnCount);
-    res.push(photoRateButtonsArrays[0]);
-    res.push(photoRateButtonsArrays[1]);
+  if (btnCount){
+    if (btnCount<=5){
+      res.push(photoRateButtonsGenerator(btnCount));
+    } else {
+      let photoRateButtonsArrays = photoRateButtonsGenerator(btnCount);
+      res.push(photoRateButtonsArrays[0]);
+      res.push(photoRateButtonsArrays[1]);
+    }
   }
   res.push(buttonsArray[0]);
   res.push(buttonsArray[1]);
   return res;
 }
 
-<<<<<<< HEAD
-function correctButtonNumber(ctx) {
-  // TODO: здесь нужно заменить сраный маркап на
-  fullButtonsMarkup((ctx.session.works || []).lenght)
-=======
+// TODO: оно почему-то не может изменить сообщение
 async function correctButtonNumber(ctx) {
-  await ctx.editMessageReplyMarkup(ctx.session.caption[0], ctx.session.caption[1], fullButtonsMarkup((ctx.session.works || []).lenght));
->>>>>>> a3c4b95590c8bf2b413e61f03cd421d7711ec953
+  await ctx.telegram.editMessageReplyMarkup(ctx.from.id, ctx.session.caption[1], undefined, { keyboard: fullButtonsMarkup((ctx.session.works || []).lenght)});
 }
 
 new (class RateScene extends Scene {
@@ -100,7 +97,7 @@ new (class RateScene extends Scene {
     ctx.session.show = { index: user.page };
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
-    correctButtonNumber(ctx);
+    await correctButtonNumber(ctx);
   }
 
   async savePost(ctx) {
@@ -151,12 +148,12 @@ new (class RateScene extends Scene {
 
     switch (ctx.message.text) {
     case "Следующая страцница":
-      user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
-      correctButtonNumber(ctx);
+      await user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
+      await correctButtonNumber(ctx);
       break;
     case "Предыдущая страцница":
-      user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
-      correctButtonNumber(ctx);
+      await user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
+      await  correctButtonNumber(ctx);
       break;
     case "Назад":
       ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
