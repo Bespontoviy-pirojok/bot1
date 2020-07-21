@@ -1,4 +1,4 @@
-const { Scene, Markup, Extra } = require("./Scenes");
+const { Scene, Markup, Extra, Telegraf} = require("./Scenes");
 
 const { ObjectID } = require("mongodb");
 
@@ -65,9 +65,14 @@ function fullButtonsMarkup(btnCount){
   return res;
 }
 
+<<<<<<< HEAD
 function correctButtonNumber(ctx) {
   // TODO: здесь нужно заменить сраный маркап на
   fullButtonsMarkup((ctx.session.works || []).lenght)
+=======
+async function correctButtonNumber(ctx) {
+  await ctx.editMessageReplyMarkup(ctx.session.caption[0], ctx.session.caption[1], fullButtonsMarkup((ctx.session.works || []).lenght));
+>>>>>>> a3c4b95590c8bf2b413e61f03cd421d7711ec953
 }
 
 new (class RateScene extends Scene {
