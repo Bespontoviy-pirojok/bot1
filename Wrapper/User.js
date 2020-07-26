@@ -129,7 +129,6 @@ class User extends Wrapper {
     //  Кешируем работы
     ctx.session.works = works;
     //  Сколько места занимает страница
-    console.log(works.length);
     return works.length;
   }
 
