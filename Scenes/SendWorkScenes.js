@@ -5,8 +5,8 @@ async function sendWork(ctx) {
   const work = await ctx.base.setPost(ctx.session.work);
   await ctx.base.postedPost(ctx.from.id, work._id);
   await ctx.reply(
-    "Работа успешно добавлена, найти её можно в разделе \"Мои работы\".\n\nТеперь вы можете отправить ещё одну работу?",
-    Markup.keyboard(["Готово", "Назад"]).oneTime().resize().extra()
+    "Работа успешно добавлена, найти её можно в разделе \"Мои работы\"\nЧтобы вернуться в главное меню нажмите \"назад\"\"",
+    Markup.keyboard(["Добавить ещё одну работу", "Назад"]).oneTime().resize().extra()
   );
   await ctx.scene.enter("SendWorkInit");
 }
@@ -60,7 +60,7 @@ new (class SendWorkInitScene extends Scene {
     const work = ctx.session.work;
 
     switch (ctx.message.text) {
-    case "Готово":
+    case "Готово" || "Добавить ещё одну работу":
       //  Если есть фото и их можно вместить в альбом
       if (work.photos.length > 0 && work.photos.length < 10) {
         await ctx.scene.enter("DescriptionQuestion");

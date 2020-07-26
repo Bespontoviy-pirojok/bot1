@@ -28,7 +28,7 @@ async function showToRate(ctx) {
 }
 
 var buttonsArray = [
-  ["Предыдущая страцница", "Следующая страцница"],
+  ["Предыдущая страница", "Следующая страница"],
   ["Назад"],
 ];
 
@@ -84,7 +84,7 @@ new (class RateScene extends Scene {
 
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
-      "Оценить чужие работы\nВыберите номер работы для оценки",
+      "Введите номер работы для оценки",
       Markup.keyboard(fullButtonsMarkup(0))
         .resize()
         .extra()
@@ -94,7 +94,6 @@ new (class RateScene extends Scene {
     ctx.session.show = { index: user.page };
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
-    correctButtonNumber(ctx);
   }
 
   async savePost(ctx) {
@@ -146,11 +145,10 @@ new (class RateScene extends Scene {
     switch (ctx.message.text) {
     case "Следующая страцница":
       user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
-      correctButtonNumber(ctx);
+
       break;
     case "Предыдущая страцница":
       user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
-      correctButtonNumber(ctx);
       break;
     case "Назад":
       ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
