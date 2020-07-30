@@ -1,4 +1,4 @@
-const { Scene, Markup, Extra, Telegraf} = require("./Scenes");
+const { Scene, Markup, Extra} = require("./Scenes");
 
 const { ObjectID } = require("mongodb");
 
@@ -33,40 +33,30 @@ var buttonsArray = [
 ];
 
 function photoRateButtonsGenerator(btnCount){
-  let res = [];
+  let res = [[]];
   if (btnCount > 0 && btnCount <= 5) {
     for (let i = 1; i <= btnCount; ++i) {
-      res.push(i.toString());
+      res[0].push(i.toString());
     }
   } else if (btnCount > 0 && btnCount <= 10) {
     res = [[], []];
     const separator = (btnCount / 2) | 0;
-    for (let i = 1; i < separator; ++i) {
+    for (let i = 1; i <= separator; ++i) {
       res[0].push(i.toString());
     }
-    for (let i = separator; i <= btnCount; ++i) {
+    for (let i = separator + 1; i <= btnCount; ++i) {
       res[1].push(i.toString());
     }
   }
+  console.log(btnCount, res);
   return res;
 }
 
 function fullButtonsMarkup(btnCount){
-  let res = [];
-  if (btnCount<=5){
-    res.push(photoRateButtonsGenerator(btnCount));
-  } else {
-    let photoRateButtonsArrays = photoRateButtonsGenerator(btnCount);
-    res.push(photoRateButtonsArrays[0]);
-    res.push(photoRateButtonsArrays[1]);
-  }
+  let res = photoRateButtonsGenerator(btnCount);
   res.push(buttonsArray[0]);
   res.push(buttonsArray[1]);
   return res;
-}
-
-async function correctButtonNumber(ctx) {
-  await ctx.editMessageReplyMarkup(ctx.session.caption[0], ctx.session.caption[1], fullButtonsMarkup((ctx.session.works || []).lenght));
 }
 
 new (class RateScene extends Scene {
@@ -84,16 +74,18 @@ new (class RateScene extends Scene {
 
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
-      "Введите номер работы для оценки",
+      "Оценка работ",
       Markup.keyboard(fullButtonsMarkup(0))
         .resize()
         .extra()
     );
     ctx.session.caption = [chat.id, message_id];
+    
     const user = await ctx.base.getUser(ctx.from.id);
     ctx.session.show = { index: user.page };
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
+    await ctx.user.needNumber(ctx, "оценки");
   }
 
   async savePost(ctx) {
@@ -129,6 +121,7 @@ new (class RateScene extends Scene {
   async main(ctx) {
     const user = ctx.user,
       show = ctx.session.show;
+    
     if (/[1-8]/.test(ctx.message.text)) {
       show.indexWork = +ctx.message.text - 1;
       show.array = ctx.session.works;
@@ -137,23 +130,23 @@ new (class RateScene extends Scene {
           "Работы с таким номером не существует, попробуйте заново."
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
-        show.messageSize += 2;
+        show.messageSize += 1;
       } else await showToRate(ctx);
       return;
     }
-
+    
     switch (ctx.message.text) {
-    case "Следующая страцница":
-      user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
-
+    case "Следующая страница":
+      await user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
+      await ctx.user.needNumber(ctx, "оценки");
+      ctx.session.show.messageSize += 1;
       break;
-    case "Предыдущая страцница":
-      user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
+    case "Предыдущая страница":
+      await user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
+      await ctx.user.needNumber(ctx, "оценки");
       break;
     case "Назад":
       ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
-      ctx.telegram.deleteMessage(...ctx.session.caption);
-      await user.deleteLastNMessage(ctx);
       await user.goMain(ctx);
       break;
     }

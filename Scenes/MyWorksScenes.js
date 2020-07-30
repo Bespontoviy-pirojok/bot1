@@ -18,25 +18,41 @@ new (class MyWorksScene extends Scene {
     const posted = (await ctx.base.getUser(ctx.from.id)).posted;
     //  Индексация кеша
     ctx.session.show = {
-      index: posted.length - 1,
+      index: ((posted.length - 1) / 8) | 0,
       size: posted.length,
       array: posted,
     };
-    await ctx.user.sendWork(ctx);
+    await ctx.user.sendPage(ctx);
+    await ctx.user.needNumber(ctx, "просмотра оценки");
   }
 
   async main(ctx) {
-    const user = ctx.user;
+    const user = ctx.user,
+      show = ctx.session.show;
+    
+    if (/[1-8]/.test(ctx.message.text)) {
+      show.indexWork = +ctx.message.text - 1;
+      show.array = ctx.session.works;
+      if (!show.array[show.indexWork]) {
+        await ctx.reply(
+          "Работы с таким номером не существует, попробуйте заново."
+        );
+        await user.checkDos(ctx, user.deleteLastNMessage);
+        show.messageSize += 1;
+      } else await ctx.user.sendWork(ctx, show.array[show.indexWork]._id);
+      return;
+    }
+    
     switch (ctx.message.text) {
     case "Следующая страцница":
-      user.updateWith(user.shiftIndex(ctx, -1), user.sendWork);
+      await user.updateWith(user.shiftIndex(ctx, -1), user.sendPage);
+      await ctx.user.needNumber(ctx, "просмотра оценки");      
       break;
     case "Предыдущая страцница":
-      user.updateWith(user.shiftIndex(ctx, 1), user.sendWork);
+      await user.updateWith(user.shiftIndex(ctx, 1), user.sendPage);
+      await ctx.user.needNumber(ctx, "просмотра оценки");
       break;
     case "Назад":
-      ctx.telegram.deleteMessage(...ctx.session.caption);
-      await user.deleteLastNMessage(ctx);
       await user.goMain(ctx);
       break;
     default:
