@@ -22,7 +22,7 @@ new (class MyWorksScene extends Scene {
       size: posted.length,
       array: posted,
     };
-    await ctx.user.sendPage(ctx);
+    ctx.session.show.messageSize = await ctx.user.sendPage(ctx);
     await ctx.user.needNumber(ctx, "просмотра оценки");
   }
 
@@ -39,7 +39,7 @@ new (class MyWorksScene extends Scene {
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 1;
-      } else await ctx.user.sendWork(ctx, show.array[show.indexWork]._id);
+      } else show.messageSize = await ctx.user.sendWork(ctx, show.array[show.indexWork]._id);
       return;
     }
     

@@ -106,12 +106,11 @@ class User extends Wrapper {
       show = ctx.session.show,
       //  Получение старницы с постами
       works = posts.slice(perPage * page, perPage * (page + 1));
-    console.log(page, works);
-    for (let i = 0; i < posts.length; i++) {
-      if (!posts[i].photos) {
-        posts[i] = await global.DataBaseController.getPost(posts[i]._id);
+    for (let i = 0; i < works.length; i++) {
+      if (!works[i].photos) {
+        works[i] = await global.DataBaseController.getPost(works[i]._id);
       }
-      posts[i] = { _id: posts[i]._id, preview: posts[i].photos[0] };
+      works[i] = { _id: works[i]._id, preview: works[i].photos[0] };
     }
     // Если нет ничего нового
     if (works.length === 0) {

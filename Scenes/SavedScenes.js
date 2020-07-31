@@ -26,7 +26,7 @@ new (class SavedScene extends Scene {
     };
     console.log(saved);
     //  Отправка пользователю работ
-    await ctx.user.sendPage(ctx);
+    ctx.session.show.messageSize = await ctx.user.sendPage(ctx);
     await ctx.user.needNumber(ctx, "просмотра");
   }
 
@@ -35,6 +35,7 @@ new (class SavedScene extends Scene {
       show = ctx.session.show;
     
     if (/[1-8]/.test(ctx.message.text)) {
+      user.deleteLastNMessage(ctx);
       show.indexWork = +ctx.message.text - 1;
       show.array = ctx.session.works;
       if (!show.array[show.indexWork]) {
@@ -43,7 +44,7 @@ new (class SavedScene extends Scene {
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 1;
-      } else await ctx.user.sendWork(ctx);
+      } else show.messageSize = await ctx.user.sendWork(ctx);
       return;
     }
     
