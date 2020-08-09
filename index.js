@@ -22,7 +22,6 @@ user.main = async (ctx) => {
       "Сохраненное",
     ])
       .resize()
-      .oneTime()
       .extra()
   );
   ctx.session.caption = [chat.id, message_id];

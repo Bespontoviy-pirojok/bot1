@@ -6,7 +6,7 @@ async function sendWork(ctx) {
   await ctx.base.postedPost(ctx.from.id, work._id);
   await ctx.reply(
     "Работа успешно добавлена, найти её можно в разделе \"Мои работы\"\nЧтобы вернуться в главное меню нажмите \"назад\"",
-    Markup.keyboard(["Добавить ещё одну работу", "Назад"]).oneTime().resize().extra()
+    Markup.keyboard(["Добавить ещё одну работу", "Назад"]).resize().extra()
   );
   await ctx.scene.enter("SendWorkInit");
 }
@@ -21,7 +21,7 @@ new (class SendWorkScene extends Scene {
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
       "Отправьте фотографии в формате jpeg или png и нажмите кнопку готово.\nПервая фотография будет использоваться в качестве превью к вашей работе",
-      Markup.keyboard(["Готово", "Назад"]).oneTime().resize().extra()
+      Markup.keyboard(["Готово", "Назад"]).resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];
     await ctx.scene.enter("SendWorkInit");
@@ -87,7 +87,7 @@ new (class DescriptionQuestionScene extends Scene {
   async question(ctx) {
     await ctx.reply(
       "Добавить описание?",
-      Markup.keyboard(["Да", "Нет", "Назад"]).resize().oneTime().extra()
+      Markup.keyboard(["Да", "Нет", "Назад"]).resize().extra()
     );
   }
 
@@ -117,7 +117,7 @@ new (class EnterDescriptionScene extends Scene {
   async askDescription(ctx) {
     await ctx.reply(
       "Введите описание вашей работы",
-      Markup.keyboard(["Назад"]).resize().oneTime().extra()
+      Markup.keyboard(["Назад"]).resize().extra()
     );
   }
   async addDescription(ctx) {
