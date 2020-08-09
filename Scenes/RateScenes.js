@@ -7,11 +7,9 @@ async function showToRate(ctx) {
   const user = ctx.user,
     show = ctx.session.show;
   await user.deleteLastNMessage(ctx);
-  [show.index, show.indexWork] = [show.indexWork, show.index];
   ctx.session.show.messageSize = await user.sendWork(ctx);
-  await ctx.base.seenPost(ctx.from.id, show.array[show.index]._id);
   await ctx.reply(
-    "Введите номер работы (1-5) для оценки",
+    "Оцените работу или введите номер другой работы, текущая работа: " + (1 + ctx.session.show.indexWork),
     Extra.HTML().markup((m) =>
       m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
@@ -24,7 +22,6 @@ async function showToRate(ctx) {
       ])
     )
   );
-  [show.index, show.indexWork] = [show.indexWork, show.index];
   show.messageSize++;
 }
 
@@ -81,9 +78,9 @@ new (class RateScene extends Scene {
         .extra()
     );
     ctx.session.caption = [chat.id, message_id];
-    
+      
     const user = await ctx.base.getUser(ctx.from.id);
-    ctx.session.show = { index: user.page };
+    ctx.session.show = { index: user.page, status: "many"};
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
     await ctx.user.needNumber(ctx, "оценки");
@@ -116,7 +113,8 @@ new (class RateScene extends Scene {
         ],
       ],
     });
-    ctx.base.putRate(ctx.from.id, ctx.match[2]/*postId*/, ctx.match[1]/*rate*/);
+    await ctx.base.putRate(ctx.from.id, ObjectID(ctx.match[2]/*postId*/), ctx.match[1]/*rate*/);
+    await ctx.base.seenPost(ctx.from.id, ObjectID(ctx.match[2]/*postId*/));
   }
 
   async main(ctx) {
@@ -132,23 +130,35 @@ new (class RateScene extends Scene {
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 1;
-      } else await showToRate(ctx);
+      } else {
+        show.status = "one";
+        await showToRate(ctx);
+      }
       return;
     }
     
     switch (ctx.message.text) {
     case "Следующая страница":
+      show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
       await ctx.user.needNumber(ctx, "оценки");
-      ctx.session.show.messageSize += 1;
       break;
     case "Предыдущая страница":
+      show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
       await ctx.user.needNumber(ctx, "оценки");
       break;
     case "Назад":
-      ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
-      await showToRate(ctx);
+      if (show.status === "many")
+      {
+        show.status = undefined;
+        await ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
+        await ctx.user.goMain(ctx);
+      } else {
+        show.status = "many";  
+        await user.updateWith(ctx, user.sendWorksGroup);
+        await ctx.user.needNumber(ctx, "оценки");
+      }
       break;
     }
   }
