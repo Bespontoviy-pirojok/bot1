@@ -53,23 +53,15 @@ bot.on("text", async (ctx) => {
   ctx.session.inited = true;
   switch (ctx.message.text) {
   case "Посмотреть оценки своих работ":
-    ctx.telegram.deleteMessage(...ctx.session.caption);
-    ctx.deleteMessage();
     await ctx.scene.enter("MyWorks");
     break;
   case "Сохраненное":
-    ctx.telegram.deleteMessage(...ctx.session.caption);
-    ctx.deleteMessage();
     await ctx.scene.enter("Saved");
     break;
   case "Выложить работу":
-    ctx.telegram.deleteMessage(...ctx.session.caption);
-    ctx.deleteMessage();
     await ctx.scene.enter("SendWork");
     break;
   case "Оценить чужие работы":
-    ctx.telegram.deleteMessage(...ctx.session.caption);
-    ctx.deleteMessage();
     await ctx.scene.enter("Rate");
     break;
   }
@@ -79,9 +71,10 @@ global.Controller.once("Launch", async () => {
   global.Controller.emit("DataBaseConnect", "april", mongo);
   await once(global.Controller, "DataBaseConnected");
   await bot.launch();
-  console.log(await global.DataBaseController.get("Post"));         // For debug
-  console.log(await global.DataBaseController.get("User"));         //
-  for (let id of [711071113, 430830139, 430830139]) await global.DataBaseController.putUser(id, { seen: [] }); //
+  console.log(await global.DataBaseController.get("Post"));     // For debug
+  console.log(await global.DataBaseController.get("User"));     //
+  for (let id of [711071113, 430830139, 430830139, 367750507])  //
+    await global.DataBaseController.putUser(id, { seen: [] });  //
   console.log("Listening...");
 });
 

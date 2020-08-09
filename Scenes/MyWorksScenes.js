@@ -12,7 +12,7 @@ new (class MyWorksScene extends Scene {
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
       "Оценки моих работ",
-      Markup.keyboard([["Следующая страцница", "Предыдущая страцница"], "Назад"]).resize().extra()
+      Markup.keyboard([["Следующая страцница", "Предыдущая страцница"], ["Назад"]]).resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];
     const posted = (await ctx.base.getUser(ctx.from.id)).posted;
@@ -33,6 +33,7 @@ new (class MyWorksScene extends Scene {
     if (/[1-8]/.test(ctx.message.text)) {
       show.indexWork = +ctx.message.text - 1;
       show.array = ctx.session.works;
+      user.deleteLastNMessage(ctx);
       if (!show.array[show.indexWork]) {
         await ctx.reply(
           "Работы с таким номером не существует, попробуйте заново."
