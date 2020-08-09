@@ -5,7 +5,7 @@ async function sendWork(ctx) {
   const work = await ctx.base.setPost(ctx.session.work);
   await ctx.base.postedPost(ctx.from.id, work._id);
   await ctx.reply(
-    "Работа успешно добавлена, найти её можно в разделе \"Мои работы\"\nЧтобы вернуться в главное меню нажмите \"назад\"\"",
+    "Работа успешно добавлена, найти её можно в разделе \"Мои работы\"\nЧтобы вернуться в главное меню нажмите \"назад\"",
     Markup.keyboard(["Добавить ещё одну работу", "Назад"]).oneTime().resize().extra()
   );
   await ctx.scene.enter("SendWorkInit");

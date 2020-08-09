@@ -1,3 +1,4 @@
+
 const { Scene, Markup, Extra} = require("./Scenes");
 
 const { ObjectID } = require("mongodb");
@@ -10,7 +11,7 @@ async function showToRate(ctx) {
   ctx.session.show.messageSize = await user.sendWork(ctx);
   await ctx.base.seenPost(ctx.from.id, show.array[show.index]._id);
   await ctx.reply(
-    "Оцените работу!",
+    "Введите номер работы (1-5) для оценки",
     Extra.HTML().markup((m) =>
       m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
@@ -147,7 +148,7 @@ new (class RateScene extends Scene {
       break;
     case "Назад":
       ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
-      await user.goMain(ctx);
+      await showToRate(ctx);
       break;
     }
   }

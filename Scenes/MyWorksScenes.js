@@ -12,7 +12,11 @@ new (class MyWorksScene extends Scene {
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
       "Оценки моих работ",
+<<<<<<< HEAD
       Markup.keyboard([["Следующая страцница", "Предыдущая страцница"], ["Назад"]]).resize().extra()
+=======
+      Markup.keyboard([["Следующая страница", "Предыдущая страница"], "Назад"]).resize().extra()
+>>>>>>> 56c537133f01e9d37d1a5367aed18361c98c5dff
     );
     ctx.session.caption = [chat.id, message_id];
     const posted = (await ctx.base.getUser(ctx.from.id)).posted;
@@ -45,11 +49,11 @@ new (class MyWorksScene extends Scene {
     }
     
     switch (ctx.message.text) {
-    case "Следующая страцница":
+    case "Следующая страница":
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendPage);
       await ctx.user.needNumber(ctx, "просмотра оценки");      
       break;
-    case "Предыдущая страцница":
+    case "Предыдущая страница":
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendPage);
       await ctx.user.needNumber(ctx, "просмотра оценки");
       break;
