@@ -13,7 +13,7 @@ new (class SavedScene extends Scene {
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
       "Сохраненные",
-      Markup.keyboard([["⏩ Следующая страница", "❌ ⏪ Предыдущая страница"], ["⬅ Назад"]]).resize().extra()
+      Markup.keyboard([["⏪ Предыдущая страница", "⏩ Следующая страница"], ["⬅ Назад"]]).resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];
     //  Получение объекта пользователя из базы
@@ -53,7 +53,7 @@ new (class SavedScene extends Scene {
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendPage);
       await ctx.user.needNumber(ctx, "просмотра");
       break;
-    case "❌ ⏪ Предыдущая страница":
+    case "⏪ Предыдущая страница":
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendPage);
       await ctx.user.needNumber(ctx, "просмотра");
       break;

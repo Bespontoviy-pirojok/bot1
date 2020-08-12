@@ -26,7 +26,7 @@ async function showToRate(ctx) {
 }
 
 var buttonsArray = [
-  ["❌ ⏪ Предыдущая страница", "⏩ Следующая страница"],
+  ["⏪ Предыдущая страница", "⏩ Следующая страница"],
   ["⬅ Назад"],
 ];
 
@@ -143,7 +143,7 @@ new (class RateScene extends Scene {
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
       await ctx.user.needNumber(ctx, "оценки");
       break;
-    case "❌ ⏪ Предыдущая страница":
+    case "⏪ Предыдущая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
       await ctx.user.needNumber(ctx, "оценки");
