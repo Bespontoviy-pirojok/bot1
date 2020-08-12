@@ -18,7 +18,7 @@ async function showToRate(ctx) {
             String(i + 1) + "-" + show.array[show.index]._id
           )
         ),
-        [m.callbackButton("Сохранить", "save-" + show.array[show.index]._id)],
+        [m.callbackButton("📎 Сохранить", "save-" + show.array[show.index]._id)],
       ])
     )
   );
@@ -26,8 +26,8 @@ async function showToRate(ctx) {
 }
 
 var buttonsArray = [
-  ["Предыдущая страница", "Следующая страница"],
-  ["Назад"],
+  ["❌ ⏪ Предыдущая страница", "⏩ Следующая страница"],
+  ["⬅ Назад"],
 ];
 
 function photoRateButtonsGenerator(btnCount){
@@ -107,7 +107,7 @@ new (class RateScene extends Scene {
         ),
         [
           Markup.callbackButton(
-            "Сохранить",
+            "📎 Сохранить",
             "save-" + show.array[show.index]._id
           ),
         ],
@@ -138,17 +138,17 @@ new (class RateScene extends Scene {
     }
     
     switch (ctx.message.text) {
-    case "Следующая страница":
+    case "⏩ Следующая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
       await ctx.user.needNumber(ctx, "оценки");
       break;
-    case "Предыдущая страница":
+    case "❌ ⏪ Предыдущая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
       await ctx.user.needNumber(ctx, "оценки");
       break;
-    case "Назад":
+    case "⬅ Назад":
       if (show.status === "many")
       {
         show.status = undefined;
