@@ -34,17 +34,17 @@ var buttonsArray = [
 
 function photoRateButtonsGenerator(btnCount){
   let res = [];
-  if (btnCount > 0 && btnCount <= 5) {
+  if (btnCount > 0 && btnCount < 5) {
     for (let i = 1; i <= btnCount; ++i) {
       res.push(i.toString());
     }
-  } else if (btnCount > 0 && btnCount <= 10) {
+  } else if (btnCount > 0 && btnCount <= 8) {
     res = [[], []];
-    const separator = (btnCount / 2) | 0;
-    for (let i = 1; i < separator; ++i) {
+    const separator = ((btnCount+1) / 2) | 0;
+    for (let i = 1; i <= separator; ++i) {
       res[0].push(i.toString());
     }
-    for (let i = separator; i <= btnCount; ++i) {
+    for (let i = separator + 1; i <= btnCount; ++i) {
       res[1].push(i.toString());
     }
   }
@@ -52,9 +52,10 @@ function photoRateButtonsGenerator(btnCount){
 }
 
 function fullButtonsMarkup(btnCount){
+  console.log(btnCount);
   let res = [];
   if (btnCount){
-    if (btnCount<=5){
+    if (btnCount < 5){
       res.push(photoRateButtonsGenerator(btnCount));
     } else {
       let photoRateButtonsArrays = photoRateButtonsGenerator(btnCount);
@@ -69,7 +70,8 @@ function fullButtonsMarkup(btnCount){
 
 // TODO: оно почему-то не может изменить сообщение
 async function correctButtonNumber(ctx) {
-  await ctx.telegram.editMessageReplyMarkup(ctx.from.id, ctx.session.caption[1], undefined, { keyboard: fullButtonsMarkup((ctx.session.works || []).lenght)});
+  console.log(Extra.markup(fullButtonsMarkup((ctx.session.works || []).length)));
+  await ctx.telegram.editMessageReplyMarkup(ctx.from.id, ctx.session.caption[1], undefined, Extra.markup(fullButtonsMarkup((ctx.session.works || []).lenght)));
 }
 
 new (class RateScene extends Scene {
