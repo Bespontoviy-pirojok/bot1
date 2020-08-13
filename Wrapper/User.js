@@ -67,7 +67,7 @@ class User extends Wrapper {
     const show = ctx.session.show,
       posts = show.array;
     postId =
-      postId || (posts && posts[show.index] && posts[show.index]._id) || -1;
+      postId || (posts && posts[show.indexWork] && posts[show.indexWork]._id) || -1;
     if (postId === -1) {
       ctx.reply("Здесь пока ничего нет");
       ctx.session.show.messageSize = 1;
@@ -97,17 +97,22 @@ class User extends Wrapper {
     return size;
   }
 
-  //  ОТПРАВЛЯЕТ страницу с ПРЕВЬЮ из ленты ПОЛЬЗОВАТЕЛЮ
-  async sendWorksGroup(ctx, page) {
+  async sendPage(ctx, page) {
     //  Номер группы превью в ленте
     page = page || ctx.session.show.index;
-    //  Получение непросмотренных постов
-    const posts = await ctx.base.getNotSeenPosts(ctx.from.id),
+    //  Получение постов
+    let posts = ctx.session.show.array,
       perPage = 8, // Сколько превью выводим на одну страницу
       show = ctx.session.show,
       //  Получение старницы с постами
       works = posts.slice(perPage * page, perPage * (page + 1));
-    // Ксли нет ничего нового
+    for (let i = 0; i < works.length; i++) {
+      if (!works[i].photos) {
+        works[i] = await global.DataBaseController.getPost(works[i]._id);
+      }
+      works[i] = { _id: works[i]._id, preview: works[i].photos[0] };
+    }
+    // Если нет ничего нового
     if (works.length === 0) {
       show.messageSize = 1;
       ctx.reply("Пусто...");
@@ -130,6 +135,25 @@ class User extends Wrapper {
     ctx.session.works = works;
     //  Сколько места занимает страница
     return works.length;
+  }
+
+  //  ОТПРАВЛЯЕТ страницу с ПРЕВЬЮ из ленты ПОЛЬЗОВАТЕЛЮ
+  async sendWorksGroup(ctx, page) {
+    //  Получение непросмотренных постов
+    let posts = await ctx.base.getNotSeenPosts(ctx.from.id);
+    [ posts, ctx.session.show.array ] = [ ctx.session.show.array, posts ];
+    let size = this.sendPage(ctx, page);
+    [ posts, ctx.session.show.array ] = [ ctx.session.show.array, posts ];
+    return size;
+  }
+
+  async needNumber(ctx, for_)
+  {
+    if (ctx.session.works && ctx.session.works.length !== 0)
+    {
+      await ctx.reply("Введите номер работы для " + for_);
+      ctx.session.show.messageSize += 1;
+    }
   }
 
   //  Корневая сцена

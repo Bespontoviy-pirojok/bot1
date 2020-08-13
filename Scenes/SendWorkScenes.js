@@ -5,8 +5,8 @@ async function sendWork(ctx) {
   const work = await ctx.base.setPost(ctx.session.work);
   await ctx.base.postedPost(ctx.from.id, work._id);
   await ctx.reply(
-    "Работа успешно добавлена, найти её можно в разделе \"Мои работы\".\n\nТеперь вы можете отправить ещё одну работу?",
-    Markup.keyboard(["Готово", "Назад"]).oneTime().resize().extra()
+    "Работа успешно добавлена, найти её можно в разделе \"Мои работы\"\nЧтобы вернуться в главное меню нажмите \"назад\"",
+    Markup.keyboard(["🗳 Добавить ещё одну работу", "⬅ Назад"]).resize().extra()
   );
   await ctx.scene.enter("SendWorkInit");
 }
@@ -21,7 +21,7 @@ new (class SendWorkScene extends Scene {
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
       "Отправьте фотографии в формате jpeg или png и нажмите кнопку готово.\nПервая фотография будет использоваться в качестве превью к вашей работе",
-      Markup.keyboard(["Готово", "Назад"]).oneTime().resize().extra()
+      Markup.keyboard(["✅ Готово", "⬅ Назад"]).resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];
     await ctx.scene.enter("SendWorkInit");
@@ -60,7 +60,7 @@ new (class SendWorkInitScene extends Scene {
     const work = ctx.session.work;
 
     switch (ctx.message.text) {
-    case "Готово":
+    case "✅ Готово" || "🗳 Добавить ещё одну работу":
       //  Если есть фото и их можно вместить в альбом
       if (work.photos.length > 0 && work.photos.length < 10) {
         await ctx.scene.enter("DescriptionQuestion");
@@ -70,7 +70,7 @@ new (class SendWorkInitScene extends Scene {
         work.photos = [];
       }
       break;
-    case "Назад":
+    case "⬅ Назад":
       await ctx.user.goMain(ctx);
     }
   }
@@ -87,19 +87,19 @@ new (class DescriptionQuestionScene extends Scene {
   async question(ctx) {
     await ctx.reply(
       "Добавить описание?",
-      Markup.keyboard(["Да", "Нет", "Назад"]).resize().oneTime().extra()
+      Markup.keyboard(["✅ Да", "❌ Нет", "⬅ Назад"]).resize().extra()
     );
   }
 
   async main(ctx) {
     switch (ctx.message.text) {
-    case "Да":
+    case "✅ Да":
       await ctx.scene.enter("EnterDescription");
       break;
-    case "Нет":
+    case "❌ Нет":
       await sendWork(ctx);
       break;
-    case "Назад":
+    case "⬅ Назад":
       await ctx.scene.enter("SendWork");
       break;
     }
@@ -117,11 +117,11 @@ new (class EnterDescriptionScene extends Scene {
   async askDescription(ctx) {
     await ctx.reply(
       "Введите описание вашей работы",
-      Markup.keyboard(["Назад"]).resize().oneTime().extra()
+      Markup.keyboard(["⬅ Назад"]).resize().extra()
     );
   }
   async addDescription(ctx) {
-    if (ctx.message.text === "Назад")
+    if (ctx.message.text === "⬅ Назад")
       await ctx.scene.enter("DescriptionQuestion");
     else {
       ctx.session.work.description = ctx.message.text;

@@ -1,3 +1,4 @@
+
 const { Scene, Markup, Extra} = require("./Scenes");
 
 const { ObjectID } = require("mongodb");
@@ -6,11 +7,9 @@ async function showToRate(ctx) {
   const user = ctx.user,
     show = ctx.session.show;
   await user.deleteLastNMessage(ctx);
-  [show.index, show.indexWork] = [show.indexWork, show.index];
   ctx.session.show.messageSize = await user.sendWork(ctx);
-  await ctx.base.seenPost(ctx.from.id, show.array[show.index]._id);
   await ctx.reply(
-    "Оцените работу!",
+    "Оцените работу или введите номер другой работы, текущая работа: " + (1 + ctx.session.show.indexWork),
     Extra.HTML().markup((m) =>
       m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
@@ -19,24 +18,23 @@ async function showToRate(ctx) {
             String(i + 1) + "-" + show.array[show.index]._id
           )
         ),
-        [m.callbackButton("Сохранить", "save-" + show.array[show.index]._id)],
+        [m.callbackButton("📎 Сохранить", "save-" + show.array[show.index]._id)],
       ])
     )
   );
-  [show.index, show.indexWork] = [show.indexWork, show.index];
   show.messageSize++;
 }
 
 var buttonsArray = [
-  ["Предыдущая страцница", "Следующая страцница"],
-  ["Назад"],
+  ["⏪ Предыдущая страница", "⏩ Следующая страница"],
+  ["⬅ Назад"],
 ];
 
 function photoRateButtonsGenerator(btnCount){
-  let res = [];
-  if (btnCount > 0 && btnCount < 5) {
+  let res = [[]];
+  if (btnCount > 0 && btnCount <= 5) {
     for (let i = 1; i <= btnCount; ++i) {
-      res.push(i.toString());
+      res[0].push(i.toString());
     }
   } else if (btnCount > 0 && btnCount <= 8) {
     res = [[], []];
@@ -48,30 +46,15 @@ function photoRateButtonsGenerator(btnCount){
       res[1].push(i.toString());
     }
   }
+  console.log(btnCount, res);
   return res;
 }
 
 function fullButtonsMarkup(btnCount){
-  console.log(btnCount);
-  let res = [];
-  if (btnCount){
-    if (btnCount < 5){
-      res.push(photoRateButtonsGenerator(btnCount));
-    } else {
-      let photoRateButtonsArrays = photoRateButtonsGenerator(btnCount);
-      res.push(photoRateButtonsArrays[0]);
-      res.push(photoRateButtonsArrays[1]);
-    }
-  }
+  let res = photoRateButtonsGenerator(btnCount);
   res.push(buttonsArray[0]);
   res.push(buttonsArray[1]);
   return res;
-}
-
-// TODO: оно почему-то не может изменить сообщение
-async function correctButtonNumber(ctx) {
-  console.log(Extra.markup(fullButtonsMarkup((ctx.session.works || []).length)));
-  await ctx.telegram.editMessageReplyMarkup(ctx.from.id, ctx.session.caption[1], undefined, Extra.markup(fullButtonsMarkup((ctx.session.works || []).lenght)));
 }
 
 new (class RateScene extends Scene {
@@ -89,17 +72,18 @@ new (class RateScene extends Scene {
 
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
-      "Оценить чужие работы\nВыберите номер работы для оценки",
+      "Оценка работ",
       Markup.keyboard(fullButtonsMarkup(0))
         .resize()
         .extra()
     );
     ctx.session.caption = [chat.id, message_id];
+      
     const user = await ctx.base.getUser(ctx.from.id);
-    ctx.session.show = { index: user.page };
+    ctx.session.show = { index: user.page, status: "many"};
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
-    await correctButtonNumber(ctx);
+    await ctx.user.needNumber(ctx, "оценки");
   }
 
   async savePost(ctx) {
@@ -123,18 +107,20 @@ new (class RateScene extends Scene {
         ),
         [
           Markup.callbackButton(
-            "Сохранить",
+            "📎 Сохранить",
             "save-" + show.array[show.index]._id
           ),
         ],
       ],
     });
-    ctx.base.putRate(ctx.from.id, ctx.match[2]/*postId*/, ctx.match[1]/*rate*/);
+    await ctx.base.putRate(ctx.from.id, ObjectID(ctx.match[2]/*postId*/), ctx.match[1]/*rate*/);
+    await ctx.base.seenPost(ctx.from.id, ObjectID(ctx.match[2]/*postId*/));
   }
 
   async main(ctx) {
     const user = ctx.user,
       show = ctx.session.show;
+    
     if (/[1-8]/.test(ctx.message.text)) {
       show.indexWork = +ctx.message.text - 1;
       show.array = ctx.session.works;
@@ -143,25 +129,36 @@ new (class RateScene extends Scene {
           "Работы с таким номером не существует, попробуйте заново."
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
-        show.messageSize += 2;
-      } else await showToRate(ctx);
+        show.messageSize += 1;
+      } else {
+        show.status = "one";
+        await showToRate(ctx);
+      }
       return;
     }
-
+    
     switch (ctx.message.text) {
-    case "Следующая страцница":
+    case "⏩ Следующая страница":
+      show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
-      await correctButtonNumber(ctx);
+      await ctx.user.needNumber(ctx, "оценки");
       break;
-    case "Предыдущая страцница":
+    case "⏪ Предыдущая страница":
+      show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
-      await  correctButtonNumber(ctx);
+      await ctx.user.needNumber(ctx, "оценки");
       break;
-    case "Назад":
-      ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
-      ctx.telegram.deleteMessage(...ctx.session.caption);
-      await user.deleteLastNMessage(ctx);
-      await user.goMain(ctx);
+    case "⬅ Назад":
+      if (show.status === "many")
+      {
+        show.status = undefined;
+        await ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
+        await ctx.user.goMain(ctx);
+      } else {
+        show.status = "many";  
+        await user.updateWith(ctx, user.sendWorksGroup);
+        await ctx.user.needNumber(ctx, "оценки");
+      }
       break;
     }
   }

@@ -11,32 +11,49 @@ new (class MyWorksScene extends Scene {
 
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
-      "Оценки моих работ",
-      Markup.keyboard(["Следующая страцница", "Предыдущая страцница", "Назад"]).resize().extra()
+      "🏆 Оценки моих работ",
+      Markup.keyboard([["⏩ Следующая страница", "⏪ Предыдущая страница"], ["⬅ Назад"]]).resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];
     const posted = (await ctx.base.getUser(ctx.from.id)).posted;
     //  Индексация кеша
     ctx.session.show = {
-      index: posted.length - 1,
+      index: ((posted.length - 1) / 8) | 0,
       size: posted.length,
       array: posted,
     };
-    await ctx.user.sendWork(ctx);
+    ctx.session.show.messageSize = await ctx.user.sendPage(ctx);
+    await ctx.user.needNumber(ctx, "просмотра оценки");
   }
 
   async main(ctx) {
-    const user = ctx.user;
+    const user = ctx.user,
+      show = ctx.session.show;
+    
+    if (/[1-8]/.test(ctx.message.text)) {
+      show.indexWork = +ctx.message.text - 1;
+      show.array = ctx.session.works;
+      user.deleteLastNMessage(ctx);
+      if (!show.array[show.indexWork]) {
+        await ctx.reply(
+          "Работы с таким номером не существует, попробуйте заново."
+        );
+        await user.checkDos(ctx, user.deleteLastNMessage);
+        show.messageSize += 1;
+      } else show.messageSize = await ctx.user.sendWork(ctx, show.array[show.indexWork]._id);
+      return;
+    }
+    
     switch (ctx.message.text) {
-    case "Следующая страцница":
-      user.updateWith(user.shiftIndex(ctx, -1), user.sendWork);
+    case "⏩ Следующая страница":
+      await user.updateWith(user.shiftIndex(ctx, -1), user.sendPage);
+      await ctx.user.needNumber(ctx, "просмотра оценки");      
       break;
-    case "Предыдущая страцница":
-      user.updateWith(user.shiftIndex(ctx, 1), user.sendWork);
+    case "⏪ Предыдущая страница":
+      await user.updateWith(user.shiftIndex(ctx, 1), user.sendPage);
+      await ctx.user.needNumber(ctx, "просмотра оценки");
       break;
-    case "Назад":
-      ctx.telegram.deleteMessage(...ctx.session.caption);
-      await user.deleteLastNMessage(ctx);
+    case "⬅ Назад":
       await user.goMain(ctx);
       break;
     default:
