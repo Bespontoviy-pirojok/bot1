@@ -81,7 +81,7 @@ new (class RateScene extends Scene {
     ctx.session.caption = [chat.id, message_id];
       
     const user = await ctx.base.getUser(ctx.from.id);
-    ctx.session.show = { index: user.page, status: "many"};
+    ctx.session.show = { index: user.page, status: "many" };
     ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
     ctx.session.show.array = ctx.session.works;
     await ctx.user.needNumber(ctx, "оценки");
@@ -124,7 +124,7 @@ new (class RateScene extends Scene {
     
     if (/[1-8]/.test(ctx.message.text)) {
       show.indexWork = +ctx.message.text - 1;
-      show.array = ctx.session.works;
+      [show.array, ctx.session.works] = [ctx.session.works, show.array];
       if (!show.array[show.indexWork]) {
         await ctx.reply(
           "Работы с таким номером не существует, попробуйте заново."
@@ -135,6 +135,7 @@ new (class RateScene extends Scene {
         show.status = "one";
         await showToRate(ctx);
       }
+      [show.array, ctx.session.works] = [ctx.session.works, show.array];
       return;
     }
     

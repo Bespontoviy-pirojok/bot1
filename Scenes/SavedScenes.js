@@ -23,6 +23,7 @@ new (class SavedScene extends Scene {
       index: ((saved.length-1) / 8) | 0,
       size: saved.length,
       array: saved,
+      status: "many",
     };
     console.log(saved);
     //  Отправка пользователю работ
@@ -44,21 +45,34 @@ new (class SavedScene extends Scene {
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 1;
-      } else show.messageSize = await ctx.user.sendWork(ctx);
+      } else {
+        show.status = "one";
+        show.messageSize = await ctx.user.sendWork(ctx);
+      }
       return;
     }
     
     switch (ctx.message.text) {
     case "⏩ Следующая страница":
+      show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendPage);
       await ctx.user.needNumber(ctx, "просмотра");
       break;
     case "⏪ Предыдущая страница":
+      show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendPage);
       await ctx.user.needNumber(ctx, "просмотра");
       break;
     case "⬅ Назад":
-      await user.goMain(ctx);
+      if (show.status === "many")
+      {
+        show.status = undefined;
+        await ctx.user.goMain(ctx);
+      } else {
+        show.status = "many";  
+        await user.updateWith(ctx, user.sendPage);
+        await ctx.user.needNumber(ctx, "просмотра оценки");
+      }
       break;
     default:
       ctx.reply("Хуйню не неси");

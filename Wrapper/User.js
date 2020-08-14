@@ -103,9 +103,11 @@ class User extends Wrapper {
     //  Получение постов
     let posts = ctx.session.show.array,
       perPage = 8, // Сколько превью выводим на одну страницу
-      show = ctx.session.show,
+      show = ctx.session.show;
       //  Получение старницы с постами
-      works = posts.slice(perPage * page, perPage * (page + 1));
+    console.log(posts.length, page);
+    let works = posts.slice(perPage * page, perPage * (page + 1));
+    console.log(works.length, page);
     for (let i = 0; i < works.length; i++) {
       if (!works[i].photos) {
         works[i] = await global.DataBaseController.getPost(works[i]._id);
@@ -125,12 +127,12 @@ class User extends Wrapper {
         this.typedAsPhoto(works.map((it) => it.preview))
       )
       .catch(async (e) => {
-        console.log(e.on.payload);
+        console.log("Error", e.on);
         works.length = 1;
         await ctx.reply("error");
       });
     //  Количество страниц
-    show.size = ((posts.length + perPage - 1) / perPage) | 0;
+    show.size = ((ctx.session.show.size + perPage - 1) / perPage) | 0;
     //  Кешируем работы
     ctx.session.works = works;
     //  Сколько места занимает страница

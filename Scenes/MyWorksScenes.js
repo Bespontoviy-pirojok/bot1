@@ -21,6 +21,7 @@ new (class MyWorksScene extends Scene {
       index: ((posted.length - 1) / 8) | 0,
       size: posted.length,
       array: posted,
+      status: "many",
     };
     ctx.session.show.messageSize = await ctx.user.sendPage(ctx);
     await ctx.user.needNumber(ctx, "просмотра оценки");
@@ -40,24 +41,35 @@ new (class MyWorksScene extends Scene {
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 1;
-      } else show.messageSize = await ctx.user.sendWork(ctx, show.array[show.indexWork]._id);
+      } else {
+        show.status = "one";
+        show.messageSize = await ctx.user.sendWork(ctx, show.array[show.indexWork]._id);
+      }
       return;
     }
     
     switch (ctx.message.text) {
     case "⏩ Следующая страница":
+      show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendPage);
       await ctx.user.needNumber(ctx, "просмотра оценки");      
       break;
     case "⏪ Предыдущая страница":
+      show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendPage);
       await ctx.user.needNumber(ctx, "просмотра оценки");
       break;
     case "⬅ Назад":
-      await user.goMain(ctx);
+      if (show.status === "many")
+      {
+        show.status = undefined;
+        await ctx.user.goMain(ctx);
+      } else {
+        show.status = "many";  
+        await user.updateWith(ctx, user.sendPage);
+        await ctx.user.needNumber(ctx, "просмотра оценки");
+      }
       break;
-    default:
-      await ctx.reply("Хуйню не неси");
     }
   }
 })();
