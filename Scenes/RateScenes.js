@@ -1,4 +1,5 @@
-
+// TODO: Есть ошибки с удалением проверить переменную хранящую количество для удаления
+// TODO: Изменилась переменная индекса работы проверить
 const { Scene, Markup, Extra} = require("./Scenes");
 
 const { ObjectID } = require("mongodb");
@@ -7,18 +8,18 @@ async function showToRate(ctx) {
   const user = ctx.user,
     show = ctx.session.show;
   await user.deleteLastNMessage(ctx);
-  ctx.session.show.messageSize = await user.sendWork(ctx);
+  show.messageSize = await user.sendWork(ctx);
   await ctx.reply(
-    "Оцените работу или введите номер другой работы, текущая работа: " + (1 + ctx.session.show.indexWork),
+    "Оцените работу или введите номер другой работы, текущая работа: " + (1 + show.indexWork),
     Extra.HTML().markup((m) =>
       m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
           m.callbackButton( // TODO: Отмечать кнопку если оценка уже поставлена
             String(i + 1),
-            String(i + 1) + "-" + show.array[show.index]._id
+            String(i + 1) + "-" + show.array[show.indexWork]._id
           )
         ),
-        [m.callbackButton("📎 Сохранить", "save-" + show.array[show.index]._id)],
+        [m.callbackButton("📎 Сохранить", "save-" + show.array[show.indexWork]._id)],
       ])
     )
   );
@@ -102,13 +103,13 @@ new (class RateScene extends Scene {
             (+ctx.match[1] === i + 1 ? "[" : "") +
               String(i + 1) +
               (+ctx.match[1] === i + 1 ? "]" : ""),
-            String(i + 1) + "-" + show.array[show.index]._id
+            String(i + 1) + "-" + show.array[show.indexWork]._id
           )
         ),
         [
           Markup.callbackButton(
             "📎 Сохранить",
-            "save-" + show.array[show.index]._id
+            "save-" + show.array[show.indexWork]._id
           ),
         ],
       ],
