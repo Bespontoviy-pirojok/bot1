@@ -33,8 +33,7 @@ new (class MyWorksScene extends Scene {
     
     if (/[1-8]/.test(ctx.message.text)) {
       show.indexWork = +ctx.message.text - 1;
-      show.array = ctx.session.works;
-      user.deleteLastNMessage(ctx);
+      [show.array, ctx.session.works] = [ctx.session.works, show.array];
       if (!show.array[show.indexWork]) {
         await ctx.reply(
           "Работы с таким номером не существует, попробуйте заново."
@@ -43,8 +42,10 @@ new (class MyWorksScene extends Scene {
         show.messageSize += 1;
       } else {
         show.status = "one";
-        show.messageSize = await ctx.user.sendWork(ctx, show.array[show.indexWork]._id);
+        await user.deleteLastNMessage(ctx);
+        show.messageSize = await ctx.user.sendWork(ctx);
       }
+      [show.array, ctx.session.works] = [ctx.session.works, show.array];
       return;
     }
     
