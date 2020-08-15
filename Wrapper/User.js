@@ -29,10 +29,12 @@ class User extends Wrapper {
   //  Смещения указателя show.index на shift в пределах show.size
   shiftIndex(ctx, shift) {
     const show = ctx.session.show;
+    console.log("user.shiftIndex: ", shift, show.index, show.size);
     if (show.index !== -1) {
       // -1, если нечего индексировать
       show.index = (show.index + ((show.size + shift) % show.size)) % show.size; //  Само смещение
     }
+    console.log("-> New index: ", show.index);
     if (show.index.toString() === "NaN") {
       show.index = 0;
     }
@@ -142,7 +144,9 @@ class User extends Wrapper {
   //  ОТПРАВЛЯЕТ страницу с ПРЕВЬЮ из ленты ПОЛЬЗОВАТЕЛЮ
   async sendWorksGroup(ctx, page) {
     //  Получение непросмотренных постов
-    let posts = await ctx.base.getNotSeenPosts(ctx.from.id);
+    let posts = await ctx.base.getNotSeenPosts(ctx.from.id),
+      show = ctx.session.show;
+    show.size = posts.length;
     [ posts, ctx.session.show.array ] = [ ctx.session.show.array, posts ];
     let size = this.sendPage(ctx, page);
     [ posts, ctx.session.show.array ] = [ ctx.session.show.array, posts ];

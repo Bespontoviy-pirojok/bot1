@@ -43,7 +43,7 @@ new (class SavedScene extends Scene {
           "Работы с таким номером не существует, попробуйте заново."
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
-        show.messageSize += 1;
+        show.messageSize += 2;
       } else {
         show.status = "one";
         await user.deleteLastNMessage(ctx);
