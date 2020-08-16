@@ -58,7 +58,7 @@ class User extends Wrapper {
     while (n--) {
       //  Само удадение
       // TODO: Как попытка исправления флекса нужно переделать через что-то async
-      ctx.deleteMessage().catch(); 
+      ctx.deleteMessage().catch();
       // if ((await ctx.deleteMessage().catch(() => -1)) === -1) break;
       ctx.update.message.message_id--;
     }
