@@ -84,13 +84,6 @@ class User extends Wrapper {
     }
     // Дополняем описание информацией об оценках
     let description = post.description || "";
-    if (post.authId === ctx.from.id) {
-      let rate = ctx.base.countRate(post);
-      if (rate === 0.0)
-        description += "\nПока никто не оценил...";
-      else 
-        description += "\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length;
-    }
     let size = post.photos.length;
 
     await ctx.telegram.sendMediaGroup(
@@ -98,7 +91,18 @@ class User extends Wrapper {
       this.typedAsPhoto(post.photos)
     );
     ctx.session.show.messageSize = size += 1;
-    await ctx.reply(`Описание: ${description}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+
+
+    await ctx.reply(`Описание: \n${description}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+
+    if (post.authId === ctx.from.id) {
+      let rate = ctx.base.countRate(post);
+      if (rate === 0.0)
+        await ctx.reply("Пока никто не оценил...");
+      else
+        await ctx.reply("\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length);
+
+    }
 
     return size;
   }
