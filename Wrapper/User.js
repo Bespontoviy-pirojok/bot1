@@ -84,13 +84,6 @@ class User extends Wrapper {
     }
     // Дополняем описание информацией об оценках
     let description = post.description || "";
-    if (post.authId === ctx.from.id) {
-      let rate = ctx.base.countRate(post);
-      if (rate === 0.0)
-        description += "\nПока никто не оценил...";
-      else 
-        description += "\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length;
-    }
     let size = post.photos.length;
 
     // КОСТЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЛЬ
@@ -102,7 +95,18 @@ class User extends Wrapper {
       this.typedAsPhoto(post.photos, description)
     );
     ctx.session.show.messageSize = size;
-    await ctx.reply(`Описание: ${descriptionCopy}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+
+    await ctx.reply(`Описание: \n${descriptionCopy}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+
+    if (post.authId === ctx.from.id) {
+      let rate = ctx.base.countRate(post);
+      if (rate === 0.0)
+        await ctx.reply("Пока никто не оценил...")
+      else
+        await ctx.reply("\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length)
+
+    }
+
 
     return size;
   }
