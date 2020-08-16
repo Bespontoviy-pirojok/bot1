@@ -1,4 +1,5 @@
 const Wrapper = require("./Wrapper");
+const {Markup} = require("telegraf")
 
 class User extends Wrapper {
   constructor() {
@@ -91,11 +92,18 @@ class User extends Wrapper {
         description += "\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length;
     }
     let size = post.photos.length;
+
+    // КОСТЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЛЬ
+    const descriptionCopy = description;
+    description = "";
+    //=============================
     await ctx.telegram.sendMediaGroup(
       ctx.from.id,
       this.typedAsPhoto(post.photos, description)
     );
     ctx.session.show.messageSize = size;
+    await ctx.reply(`Описание: ${descriptionCopy}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+
     return size;
   }
 
@@ -157,7 +165,11 @@ class User extends Wrapper {
   {
     if (ctx.session.works && ctx.session.works.length !== 0)
     {
-      await ctx.reply("Введите номер работы для " + for_);
+      // Я в душе не ебу, что здесь, но тут таск никиты
+      await ctx.reply("Введите номер работы для " + for_, Markup.keyboard([
+        ["⏪ Предыдущая страница", "⏩ Следующая страница"],
+        ["⬅ Назад"],
+      ]).resize().extra());
       ctx.session.show.messageSize += 1;
     }
   }
