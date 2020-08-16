@@ -81,9 +81,9 @@ new (class RateScene extends Scene {
     ctx.session.caption = [chat.id, message_id];
       
     const user = await ctx.base.getUser(ctx.from.id);
-    ctx.session.show = { index: user.page, status: "many" };
-    ctx.session.show.messageSize = await ctx.user.sendWorksGroup(ctx);
-    ctx.session.show.array = ctx.session.works;
+    let show = (ctx.session.show = { index: user.page, status: "many" });
+    show.messageSize = await ctx.user.sendWorksGroup(ctx);
+    show.array = ctx.session.works;
     await ctx.user.needNumber(ctx, "оценки");
   }
 
@@ -130,7 +130,7 @@ new (class RateScene extends Scene {
           "Работы с таким номером не существует, попробуйте заново."
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
-        show.messageSize += 1;
+        show.messageSize += 2;
       } else {
         show.status = "one";
         await showToRate(ctx);
