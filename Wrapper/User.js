@@ -1,5 +1,5 @@
 const Wrapper = require("./Wrapper");
-const {Markup} = require("telegraf")
+const {Markup} = require("telegraf");
 
 class User extends Wrapper {
   constructor() {
