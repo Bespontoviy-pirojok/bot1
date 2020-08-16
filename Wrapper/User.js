@@ -93,16 +93,12 @@ class User extends Wrapper {
     }
     let size = post.photos.length;
 
-    // КОСТЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЫЛЬ
-    const descriptionCopy = description;
-    description = "";
-    //=============================
     await ctx.telegram.sendMediaGroup(
       ctx.from.id,
-      this.typedAsPhoto(post.photos, description)
+      this.typedAsPhoto(post.photos)
     );
-    ctx.session.show.messageSize = size;
-    await ctx.reply(`Описание: ${descriptionCopy}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+    ctx.session.show.messageSize = size += 1;
+    await ctx.reply(`Описание: ${description}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
 
     return size;
   }

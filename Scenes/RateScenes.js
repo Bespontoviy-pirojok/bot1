@@ -14,7 +14,7 @@ async function showToRate(ctx) {
     Extra.HTML().markup((m) =>
       m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
-          m.callbackButton( // TODO: Отмечать кнопку если оценка уже поставлена
+          m.callbackButton(
             String(i + 1),
             String(i + 1) + "-" + show.array[show.indexWork]._id
           )
