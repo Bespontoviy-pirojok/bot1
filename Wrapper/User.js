@@ -90,10 +90,13 @@ class User extends Wrapper {
       ctx.from.id,
       this.typedAsPhoto(post.photos)
     );
-    ctx.session.show.messageSize = size += 1;
+    
+    if (description) {
+      await ctx.reply(`Описание: \n${description}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+      size += 1;
+    }
 
-
-    await ctx.reply(`Описание: \n${description}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+    ctx.session.show.messageSize = size;
 
     if (post.authId === ctx.from.id) {
       let rate = ctx.base.countRate(post);
@@ -101,7 +104,6 @@ class User extends Wrapper {
         await ctx.reply("Пока никто не оценил...");
       else
         await ctx.reply("\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length);
-
     }
 
     return size;
@@ -127,7 +129,7 @@ class User extends Wrapper {
     // Если нет ничего нового
     if (works.length === 0) {
       show.messageSize = 1;
-      ctx.reply("Пусто...");
+      ctx.reply(ctx.session.show.empty || "Пусто...");
       return 1;
     }
     //  Отправка превьюшек полльхователю

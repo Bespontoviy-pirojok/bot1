@@ -24,6 +24,7 @@ new (class SavedScene extends Scene {
       size: saved.length,
       array: saved,
       status: "many",
+      empty: "Вы пока не сохранили не одну работу.\nДля сохранения работы откройте её и нажмите кнопку \"Сохранить\"",
     };
     console.log(saved);
     //  Отправка пользователю работ

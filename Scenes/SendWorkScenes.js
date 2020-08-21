@@ -98,6 +98,7 @@ new (class DescriptionQuestionScene extends Scene {
       break;
     case "❌ Нет":
       await sendWork(ctx);
+      await ctx.scene.enter("SendWorkInit");
       break;
     case "⬅ Назад":
       await ctx.scene.enter("SendWork");
@@ -126,6 +127,7 @@ new (class EnterDescriptionScene extends Scene {
     else {
       ctx.session.work.description = ctx.message.text;
       await sendWork(ctx);
+      await ctx.scene.enter("SendWorkInit");
     }
   }
 })();
