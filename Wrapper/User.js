@@ -92,18 +92,19 @@ class User extends Wrapper {
     );
     
     if (description) {
-      await ctx.reply(`Описание: \n${description}`, Markup.keyboard(["⬅ Назад"]).resize().extra());
+      await ctx.reply(`Описание: \n${description}`);
       size += 1;
     }
 
     ctx.session.show.messageSize = size;
 
     if (post.authId === ctx.from.id) {
-      let rate = ctx.base.countRate(post);
+      let rate = ctx.base.countRate(post),
+        keyboard = Markup.keyboard(["⬅ Назад"]).resize().extra();
       if (rate === 0.0)
-        await ctx.reply("Пока никто не оценил...");
+        await ctx.reply("Пока никто не оценил...", keyboard);
       else
-        await ctx.reply("\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length);
+        await ctx.reply("\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length, keyboard);
     }
 
     return size;
