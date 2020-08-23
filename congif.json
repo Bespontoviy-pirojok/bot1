@@ -1,5 +1,5 @@
 {
-  "token": "1165770908:AAE0EUIto0BnCFdsD1u5tOgvWF5-HuF-HPM",
+  "token": "1206807823:AAGXMiKFzt2-lNwgNP1rqT8XqVXAY_n9C4I",
   "mongo": [
     "mongodb+srv://dima:HvJGezUtsFszxwLt@sosister-wmc26.mongodb.net/foodshare?retryWrites=true&w=majority",
     { "useUnifiedTopology": true, "fsync": true }
