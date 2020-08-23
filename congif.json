@@ -1,7 +1,7 @@
 {
   "token": "1206807823:AAGXMiKFzt2-lNwgNP1rqT8XqVXAY_n9C4I",
   "mongo": [
-    "mongodb+srv://dima:HvJGezUtsFszxwLt@sosister-wmc26.mongodb.net/foodshare?retryWrites=true&w=majority",
+    "mongodb+srv://Ratedesign:4VA5zE82oKR9CUYb@ratedesign1.jvcok.azure.mongodb.net/RateDesign_data",
     { "useUnifiedTopology": true, "fsync": true }
   ]
 }
