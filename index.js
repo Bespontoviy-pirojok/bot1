@@ -4,6 +4,7 @@
 const { token, mongo } = require("./congif.json");
 
 const { Telegraf, Markup, session, once } = require("./Scenes");
+const exec = require("child_process").exec;
 
 // Роутер бота
 const bot = new Telegraf(token);
@@ -62,6 +63,11 @@ bot.on("text", async (ctx) => {
     break;
   case "🏆 Оценить чужие работы":
     await ctx.scene.enter("Rate");
+    break;
+  case "dima.js":
+    exec("git pull", (err, stdout, stderr) =>{
+      console.log("Pulling...", stdout);
+    });
     break;
   }
 });
