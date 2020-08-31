@@ -78,8 +78,15 @@ bot.on("text", async (ctx) => {
       }
     }
     exec(cmd, (err, stdout, stderr) =>{
-      ctx.reply("Responce:\n" + stdout + "\nLog: " + stderr + "\n" + err);
-      console.log("Responce:\n" + stdout + "\nLog: " + stderr + "\n" + err);
+      let msg = "Responce:\n" + stdout + "\nLog: " + stderr + "\n" + err;
+      String.prototype.chunk = function(size) {
+        return [].concat.apply([],
+          this.split("").map(function(x,i){ return i%size ? [] : this.slice(i,i+size); }, this)
+        );
+      };
+      let chunks = msg.chunk(4000);
+      for (let part of chunks) ctx.reply(part);
+      console.log(msg);
     });
     return;
   }
