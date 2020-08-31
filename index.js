@@ -60,20 +60,22 @@ bot.on("text", async (ctx) => {
   {
     let cmd = "echo \"No commands\" && exit 1",
       text = ctx.message.text.slice(keyWord.length + 1);
-    switch (words[1])
-    {
-    case "update":
-      if (words.length >= 2 && words[2] != "")
+    if (words[1]) {
+      switch (words[1])
       {
-        let fileName = words[2];
-        fs.writeFile(fileName, text.slice(("update " + fileName).length + 1), (error) => {
-          if (error) ctx.reply(error);
-          else ctx.reply("File " + fileName + " updated!");
-        });
-      } else ctx.reply("Error: update: Need filename!");
-      return;
-    default:
-      cmd = text;
+      case "update":
+        if (words.length >= 2 && words[2] != "")
+        {
+          let fileName = words[2];
+          fs.writeFile(fileName, text.slice(("update " + fileName).length + 1), (error) => {
+            if (error) ctx.reply(error);
+            else ctx.reply("File " + fileName + " updated!");
+          });
+        } else ctx.reply("Error: update: Need filename!");
+        return;
+      default:
+        cmd = text;
+      }
     }
     exec(cmd, (err, stdout, stderr) =>{
       ctx.reply("Responce:\n" + stdout + "\nLog: " + stderr + "\n" + err);
