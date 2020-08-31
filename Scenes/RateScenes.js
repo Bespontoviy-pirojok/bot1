@@ -82,9 +82,9 @@ new (class RateScene extends Scene {
       
     const user = await ctx.base.getUser(ctx.from.id);
     let show = (ctx.session.show = { index: user.page, status: "many" });
+    if (show.index == -1) show.index = 0;
     show.messageSize = await ctx.user.sendWorksGroup(ctx);
     show.array = ctx.session.works;
-    console.log(ctx.session);
     await ctx.user.needNumber(ctx, "оценки");
   }
 

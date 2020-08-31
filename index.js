@@ -6,11 +6,9 @@ const { token, devToken, mongo } = require("./congif.json");
 const { Telegraf, Markup, session, once } = require("./Scenes");
 const exec = require("child_process").exec;
 const fs = require("fs");
-const { reply } = require("telegraf/composer");
 
 // Роутер бота
-const ЯЛОМАААААААААЛСТЕКЛОООООООО = process.env.PRODUCTION? token: devToken;
-const bot = new Telegraf(ЯЛОМАААААААААЛСТЕКЛОООООООО);
+const bot = new Telegraf(process.env.PRODUCTION? token: devToken);
 
 // Обработка обращений к базе данных
 const base = require("./Wrapper/DataBase").get();

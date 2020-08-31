@@ -113,7 +113,8 @@ class User extends Wrapper {
       show = ctx.session.show;
     //  Количество страниц
     show.size = ((ctx.session.show.size + perPage - 1) / perPage) | 0;
-    page = (!page) ? show.index = show.index % show.size || -1 : page % show.size || 0;
+    page = (!page) ? (show.index = show.index % show.size) : (page % show.size);
+    if ("" + show.index == "NaN") show.index = -1;
     //  Получение старницы с постами
     let works = posts.slice(perPage * page, perPage * (page + 1));
     for (let i = 0; i < works.length; i++) {
