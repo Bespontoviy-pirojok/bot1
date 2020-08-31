@@ -1,13 +1,18 @@
 // @mamkin_designer_bot
 // https://www.mindmeister.com/ru/1522778260?t=8C07mVgoEn
 
-const { token, mongo } = require("./congif.json");
+const { token, devToken, mongo } = require("./congif.json");
 
 const { Telegraf, Markup, session, once } = require("./Scenes");
 const exec = require("child_process").exec;
 
 // Роутер бота
-const bot = new Telegraf(token);
+if (require('mode.js').mode=='dev') {
+  const bot = new Telegraf(devToken);
+} else {
+  const bot = new Telegraf(token);
+}
+
 // Обработка обращений к базе данных
 const base = require("./Wrapper/DataBase").get();
 // Обработка упращённых обращений
