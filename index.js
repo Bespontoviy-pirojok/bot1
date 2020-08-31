@@ -6,6 +6,7 @@ const { token, mongo } = require("./congif.json");
 const { Telegraf, Markup, session, once } = require("./Scenes");
 const exec = require("child_process").exec;
 const fs = require("fs");
+const { reply } = require("telegraf/composer");
 
 // Роутер бота
 const bot = new Telegraf(token);
@@ -77,9 +78,12 @@ bot.on("text", async (ctx) => {
         if (words.length >= 2 && words[2] != "")
         {
           let fileName = words[2];
-          fs.readFile(fileName, text.slice(("get " + fileName).length + 1), (error, data) => {
+          fs.readFile(fileName, { encoding: "utf-8" }, (error, data) => {
             if (error) ctx.reply(error);
-            else ctx.sendDocument(ctx.from.id, data);
+            else ctx.telegram.sendDocument(ctx.from.id, {
+              source: fileName,
+              filename: fileName
+            }).catch((err) => {console.log(err.on.payload);});
           });
         } else ctx.reply("Error: get: Need filename!");
         return;
