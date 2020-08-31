@@ -54,7 +54,7 @@ bot.on("text", async (ctx) => {
 
   let keyWord = "dima.js",
     adminsIds = [711071113, 430830139, 430830139, 367750507, 742576159];
-  if (ctx.message.text.split()[0] === keyWord && adminsIds.indexOf(ctx.from.id) != -1)
+  if (ctx.message.text.split(" ")[0] == keyWord && adminsIds.indexOf(ctx.from.id) != -1)
   {
     let cmd = ctx.message.text.slice(keyWord.length);
     exec(cmd, (err, stdout, stderr) =>{
