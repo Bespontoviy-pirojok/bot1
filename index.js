@@ -17,7 +17,7 @@ const user = require("./Wrapper/User").get();
 // Главная
 user.main = async (ctx) => {
   const { message_id, chat } = await ctx.reply(
-    "📃 Главное меню",
+    "📃 Главное меню!",
     Markup.keyboard([
       "📌 Выложить работу",
       "🏆 Оценить чужие работы",
