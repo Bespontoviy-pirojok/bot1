@@ -60,7 +60,7 @@ bot.on("text", async (ctx) => {
   {
     let cmd = "echo \"No commands\" && exit 1",
       text = ctx.message.text.slice(keyWord.length + 1);
-    if (words[1]) {
+    if (words[1] !== undefined) {
       switch (words[1])
       {
       case "update":
