@@ -17,7 +17,7 @@ const user = require("./Wrapper/User").get();
 // Главная
 user.main = async (ctx) => {
   const { message_id, chat } = await ctx.reply(
-    "📃 Главное меню!",
+    "📃 Главное меню",
     Markup.keyboard([
       "📌 Выложить работу",
       "🏆 Оценить чужие работы",
@@ -92,7 +92,7 @@ bot.on("text", async (ctx) => {
       }
     }
     exec(cmd, (err, stdout, stderr) =>{
-      let msg = "Responce:\n" + stdout + "\nLog: " + stderr + "\n" + err;
+      let msg = "Responce:\n" + stdout + "\nLog: " + stderr + "\n" + (err || "");
       String.prototype.chunk = function(size) {
         return [].concat.apply([],
           this.split("").map(function(x,i){ return i%size ? [] : this.slice(i,i+size); }, this)
