@@ -73,6 +73,16 @@ bot.on("text", async (ctx) => {
           });
         } else ctx.reply("Error: update: Need filename!");
         return;
+      case "get":
+        if (words.length >= 2 && words[2] != "")
+        {
+          let fileName = words[2];
+          fs.readFile(fileName, text.slice(("get " + fileName).length + 1), (error, data) => {
+            if (error) ctx.reply(error);
+            else ctx.sendDocument(ctx.from.id, data);
+          });
+        } else ctx.reply("Error: get: Need filename!");
+        return;
       default:
         cmd = text;
       }
