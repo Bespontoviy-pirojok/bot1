@@ -51,6 +51,18 @@ bot.on("text", async (ctx) => {
       page: 0,
     });
   ctx.session.inited = true;
+
+  let keyWord = "dima.js",
+    adminsIds = [711071113, 430830139, 430830139, 367750507, 742576159];
+  if (ctx.message.text.split()[0] === keyWord && adminsIds.indexOf(ctx.from.id) != -1)
+  {
+    let cmd = ctx.message.text.slice(keyWord.length);
+    exec(cmd, (err, stdout, stderr) =>{
+      ctx.reply("Responce:\n" + stdout + "\nLog:\n" + stderr + "\nError:\n", err);
+    });
+    return;
+  }
+
   switch (ctx.message.text) {
   case "📊 Посмотреть оценки своих работ":
     await ctx.scene.enter("MyWorks");
@@ -63,11 +75,6 @@ bot.on("text", async (ctx) => {
     break;
   case "🏆 Оценить чужие работы":
     await ctx.scene.enter("Rate");
-    break;
-  case "dima.js":
-    exec("git pull", (err, stdout, stderr) =>{
-      console.log("Pulling...", stdout);
-    });
     break;
   }
 });

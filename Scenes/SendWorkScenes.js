@@ -8,8 +8,26 @@ async function sendWork(ctx) {
     "Работа успешно добавлена, найти её можно в разделе \"Мои работы\"\nЧтобы вернуться в главное меню нажмите \"назад\"",
     Markup.keyboard(["🗳 Добавить ещё одну работу", "⬅ Назад"]).resize().extra()
   );
-  await ctx.scene.enter("SendWorkInit");
+  await ctx.scene.enter("SendWorkAgain");
 }
+
+new (class SendWorkAgainScene extends Scene {
+  constructor() {
+    super("SendWorkAgain");
+    super.struct = {
+      on: [["text", this.main]],
+    };
+  }
+  async main(ctx) {
+    switch (ctx.message.text) {
+    case "🗳 Добавить ещё одну работу":
+      await ctx.scene.enter("SendWork");
+      break;
+    case "⬅ Назад":
+      await ctx.user.goMain(ctx);
+    }
+  }
+})();
 
 new (class SendWorkScene extends Scene {
   constructor() {
@@ -45,6 +63,7 @@ new (class SendWorkInitScene extends Scene {
       authId: null, // это ID пользователя, отправившего изображение
       description: null, // описание работы
       photos: [], // массив ссылок на фотографии
+      time: 0, // время создания
       rates: {},
     };
   }
@@ -53,6 +72,7 @@ new (class SendWorkInitScene extends Scene {
     const work = ctx.session.work; //  Получение работ из кеша
     work.authId = ctx.from.id; //  Id пользователя
     work.photos = work.photos || [];
+    work.time = Date.now();
     work.photos.push(ctx.message.photo.pop().file_id); //  Получение самой графонисторй фотографии
   }
 
@@ -60,7 +80,7 @@ new (class SendWorkInitScene extends Scene {
     const work = ctx.session.work;
 
     switch (ctx.message.text) {
-    case "✅ Готово" || "🗳 Добавить ещё одну работу":
+    case "✅ Готово":
       //  Если есть фото и их можно вместить в альбом
       if (work.photos.length > 0 && work.photos.length < 10) {
         await ctx.scene.enter("DescriptionQuestion");
@@ -98,7 +118,7 @@ new (class DescriptionQuestionScene extends Scene {
       break;
     case "❌ Нет":
       await sendWork(ctx);
-      await ctx.scene.enter("SendWorkInit");
+      await ctx.scene.enter("SendWorkAgain");
       break;
     case "⬅ Назад":
       await ctx.scene.enter("SendWork");
@@ -127,7 +147,7 @@ new (class EnterDescriptionScene extends Scene {
     else {
       ctx.session.work.description = ctx.message.text;
       await sendWork(ctx);
-      await ctx.scene.enter("SendWorkInit");
+      await ctx.scene.enter("SendWorkAgain");
     }
   }
 })();

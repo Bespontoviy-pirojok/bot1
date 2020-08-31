@@ -91,22 +91,18 @@ class User extends Wrapper {
       this.typedAsPhoto(post.photos)
     );
     
-    if (description) {
-      await ctx.reply(`Описание: \n${description}`);
-      size += 1;
+    // Заготавливаем комментарий к работе
+    let msg = ((description) ? `Описание: \n${description}` : "") + "\nВремя публикации: " + Date(post.time).toString();
+    if (post.authId === ctx.from.id) {
+      let rate = ctx.base.countRate(post);
+      msg += (rate === 0.0) ? "\nПока никто не оценил..." : "\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length;
     }
+    
+    // Отправляем комментарий
+    await ctx.reply(msg, Markup.keyboard(["⬅ Назад"]).resize().extra());
+    size += 1; // Не забываем про то что каждое новое сообщение влияет на размер сцены
 
     ctx.session.show.messageSize = size;
-
-    if (post.authId === ctx.from.id) {
-      let rate = ctx.base.countRate(post),
-        keyboard = Markup.keyboard(["⬅ Назад"]).resize().extra();
-      if (rate === 0.0)
-        await ctx.reply("Пока никто не оценил...", keyboard);
-      else
-        await ctx.reply("\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length, keyboard);
-    }
-
     return size;
   }
 
@@ -166,7 +162,7 @@ class User extends Wrapper {
 
   async needNumber(ctx, for_)
   {
-    if (ctx.session.works && ctx.session.works.length !== 0)
+    if (ctx.session.works && ctx.session.works.length !== 0 && ctx.session.show.index !== -1)
     {
       // Я в душе не ебу, что здесь, но тут таск никиты
       await ctx.reply("Введите номер работы для " + for_, Markup.keyboard([
