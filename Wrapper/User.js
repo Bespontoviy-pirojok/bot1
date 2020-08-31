@@ -107,16 +107,15 @@ class User extends Wrapper {
   }
 
   async sendPage(ctx, page) {
-    //  Номер группы превью в ленте
-    page = page || ctx.session.show.index;
     //  Получение постов
     let posts = ctx.session.show.array,
       perPage = 8, // Сколько превью выводим на одну страницу
       show = ctx.session.show;
-      //  Получение старницы с постами
-    console.log(posts.length, page);
+    //  Количество страниц
+    show.size = ((ctx.session.show.size + perPage - 1) / perPage) | 0;
+    page = (!page) ? show.index = show.index % show.size || -1 : page % show.size || 0;
+    //  Получение старницы с постами
     let works = posts.slice(perPage * page, perPage * (page + 1));
-    console.log(works.length, page);
     for (let i = 0; i < works.length; i++) {
       if (!works[i].photos) {
         works[i] = await global.DataBaseController.getPost(works[i]._id);
@@ -140,8 +139,6 @@ class User extends Wrapper {
         works.length = 1;
         await ctx.reply("error");
       });
-    //  Количество страниц
-    show.size = ((ctx.session.show.size + perPage - 1) / perPage) | 0;
     //  Кешируем работы
     ctx.session.works = works;
     //  Сколько места занимает страница
