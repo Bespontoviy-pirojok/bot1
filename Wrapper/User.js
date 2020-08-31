@@ -91,36 +91,31 @@ class User extends Wrapper {
       this.typedAsPhoto(post.photos)
     );
     
-    if (description) {
-      await ctx.reply(`Описание: \n${description}`);
-      size += 1;
+    // Заготавливаем комментарий к работе
+    let msg = ((description) ? `Описание: \n${description}` : "") + "\nДата публикации: " + (new Date(post.time)).toLocaleDateString("ru-RU", { month: "long", day: "numeric" });
+    if (post.authId === ctx.from.id) {
+      let rate = ctx.base.countRate(post);
+      msg += (rate === 0.0) ? "\nПока никто не оценил..." : "\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length;
     }
+    
+    // Отправляем комментарий
+    await ctx.reply(msg, Markup.keyboard(["⬅ Назад"]).resize().extra());
+    size += 1; // Не забываем про то что каждое новое сообщение влияет на размер сцены
 
     ctx.session.show.messageSize = size;
-
-    if (post.authId === ctx.from.id) {
-      let rate = ctx.base.countRate(post),
-        keyboard = Markup.keyboard(["⬅ Назад"]).resize().extra();
-      if (rate === 0.0)
-        await ctx.reply("Пока никто не оценил...", keyboard);
-      else
-        await ctx.reply("\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length, keyboard);
-    }
-
     return size;
   }
 
   async sendPage(ctx, page) {
-    //  Номер группы превью в ленте
-    page = page || ctx.session.show.index;
     //  Получение постов
     let posts = ctx.session.show.array,
       perPage = 8, // Сколько превью выводим на одну страницу
       show = ctx.session.show;
-      //  Получение старницы с постами
-    console.log(posts.length, page);
+    //  Количество страниц
+    show.size = ((ctx.session.show.size + perPage - 1) / perPage) | 0;
+    page = (!page) ? show.index = show.index % show.size || -1 : page % show.size || 0;
+    //  Получение старницы с постами
     let works = posts.slice(perPage * page, perPage * (page + 1));
-    console.log(works.length, page);
     for (let i = 0; i < works.length; i++) {
       if (!works[i].photos) {
         works[i] = await global.DataBaseController.getPost(works[i]._id);
@@ -144,8 +139,6 @@ class User extends Wrapper {
         works.length = 1;
         await ctx.reply("error");
       });
-    //  Количество страниц
-    show.size = ((ctx.session.show.size + perPage - 1) / perPage) | 0;
     //  Кешируем работы
     ctx.session.works = works;
     //  Сколько места занимает страница
@@ -166,7 +159,7 @@ class User extends Wrapper {
 
   async needNumber(ctx, for_)
   {
-    if (ctx.session.works && ctx.session.works.length !== 0)
+    if (ctx.session.works && ctx.session.works.length !== 0 && ctx.session.show.index !== -1)
     {
       // Я в душе не ебу, что здесь, но тут таск никиты
       await ctx.reply("Введите номер работы для " + for_, Markup.keyboard([
