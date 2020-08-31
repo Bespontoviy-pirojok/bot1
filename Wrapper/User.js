@@ -92,7 +92,7 @@ class User extends Wrapper {
     );
     
     // Заготавливаем комментарий к работе
-    let msg = ((description) ? `Описание: \n${description}` : "") + "\nВремя публикации: " + Date(post.time).toLocaleDateString("ru-RU", { month: "long", day: "numeric" });
+    let msg = ((description) ? `Описание: \n${description}` : "") + "\nВремя публикации: " + new Date(post.time).toLocaleDateString("ru-RU", { month: "long", day: "numeric" });
     if (post.authId === ctx.from.id) {
       let rate = ctx.base.countRate(post);
       msg += (rate === 0.0) ? "\nПока никто не оценил..." : "\nСредняя оценка: " + rate + "\nЧеловек оценило: " + Object.values(post.rates).length;
