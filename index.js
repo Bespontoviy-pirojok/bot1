@@ -5,6 +5,7 @@ const { token, mongo } = require("./congif.json");
 
 const { Telegraf, Markup, session, once } = require("./Scenes");
 const exec = require("child_process").exec;
+const fs = require("fs");
 
 // Роутер бота
 const bot = new Telegraf(token);
@@ -53,12 +54,30 @@ bot.on("text", async (ctx) => {
   ctx.session.inited = true;
 
   let keyWord = "dima.js",
-    adminsIds = [711071113, 430830139, 430830139, 367750507, 742576159];
-  if (ctx.message.text.split(" ")[0] == keyWord && adminsIds.indexOf(ctx.from.id) != -1)
+    adminsIds = [711071113, 430830139, 430830139, 367750507, 742576159, 949690401],
+    words = ctx.message.text.split(" ");
+  if (words[0] == keyWord && adminsIds.indexOf(ctx.from.id) != -1)
   {
-    let cmd = ctx.message.text.slice(keyWord.length);
+    let cmd = "echo \"No commands\" && exit 1",
+      text = ctx.message.text.slice(keyWord.length + 1);
+    switch (words[1])
+    {
+    case "update":
+      if (words.length >= 2 && words[2] != "")
+      {
+        let fileName = words[2];
+        fs.writeFile(fileName, text.slice(("update " + fileName).length + 1), (error) => {
+          if (error) ctx.reply(error);
+          else ctx.reply("File " + fileName + " updated!");
+        });
+      } else ctx.reply("Error: update: Need filename!");
+      return;
+    default:
+      cmd = text;
+    }
     exec(cmd, (err, stdout, stderr) =>{
-      ctx.reply("Responce:\n" + stdout + "\nLog:\n" + stderr + "\nError:\n", err);
+      ctx.reply("Responce:\n" + stdout + "\nLog: " + stderr + "\n" + err);
+      console.log("Responce:\n" + stdout + "\nLog: " + stderr + "\n" + err);
     });
     return;
   }
