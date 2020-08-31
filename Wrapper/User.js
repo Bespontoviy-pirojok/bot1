@@ -126,7 +126,7 @@ class User extends Wrapper {
     // Если нет ничего нового
     if (works.length === 0) {
       show.messageSize = 1;
-      ctx.reply(ctx.session.show.empty || "Пусто...");
+      ctx.reply(ctx.session.show.empty || "Пусто...", Markup.keyboard(["⬅ Назад"]).resize().extra());
       return 1;
     }
     //  Отправка превьюшек полльхователю
