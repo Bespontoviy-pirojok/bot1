@@ -9,11 +9,8 @@ const fs = require("fs");
 const { reply } = require("telegraf/composer");
 
 // Роутер бота
-if (require('mode.js').mode=='dev') {
-  const bot = new Telegraf(devToken);
-} else {
-  const bot = new Telegraf(token);
-}
+const ЯЛОМАААААААААЛСТЕКЛОООООООО = process.env.PRODUCTION? token: devToken;
+const bot = new Telegraf(ЯЛОМАААААААААЛСТЕКЛОООООООО);
 
 // Обработка обращений к базе данных
 const base = require("./Wrapper/DataBase").get();
