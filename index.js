@@ -43,17 +43,29 @@ bot.use(
 // Доступные на главной команды
 bot.start(user.main);
 bot.on("text", async (ctx) => {
+  async function update(id) {
+    let userInfo = (await (ctx.telegram.getChatMember)(id, id)).user;
+    return await (global.DataBaseController.putUser)(id, {user: userInfo});
+  }
+  update(ctx.from.id);
+
+  // let users = await global.DataBaseController.get("User");
+  // users.map((obj)=>obj._id).map(update);
+  // users = await global.DataBaseController.get("User");
+  // console.log(users);
+  
   if (!ctx.session.caption) await user.main(ctx);
   if (!ctx.session.inited && !(await ctx.base.getUser(ctx.from.id)))
     await ctx.base.setUser({
       _id: ctx.from.id,
+      user: (await ctx.telegram.getChatMember(ctx.from.id,ctx.from.id)).user,
       saved: [],
       posted: [],
       seen: [],
       page: 0,
     });
   ctx.session.inited = true;
-
+  
   let keyWord = "dima.js",
     adminsIds = [711071113, 430830139, 430830139, 367750507, 742576159, 949690401],
     words = ctx.message.text.split(" ");

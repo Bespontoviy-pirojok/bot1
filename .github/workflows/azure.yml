@@ -35,10 +35,9 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
     - name: npm install, build, and test
-      run: |
+      run: npm install
         # Build and test the project, then
         # deploy to Azure Web App.
-        npm install
     - name: 'Deploy to Azure WebApp'
       uses: azure/webapps-deploy@v2
       with:
