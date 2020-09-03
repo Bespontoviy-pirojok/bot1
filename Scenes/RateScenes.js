@@ -7,11 +7,12 @@ const { ObjectID } = require("mongodb");
 async function showToRate(ctx) {
   const user = ctx.user,
     show = ctx.session.show,
-    postId = show.array[show.indexWork]._id;
+    postId = show.array[show.indexWork]._id,
+    rate = await ctx.base.getRate(postId);
   await user.deleteLastNMessage(ctx);
   show.messageSize = await user.sendWork(ctx);
   await ctx.reply(
-    "Средняя оценка работы: " + await ctx.base.getRate(postId) + "\nОцените работу:",
+    (rate ? "Средняя оценка работы: " + rate + "\nОцените работу:" : "Работу ещё никто не оценил, станьте первым!"),
     Extra.HTML().markup((m) =>
       m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
