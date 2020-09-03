@@ -11,7 +11,7 @@ async function showToRate(ctx) {
   await user.deleteLastNMessage(ctx);
   show.messageSize = await user.sendWork(ctx);
   await ctx.reply(
-    "Средняя оценка работы: " + ctx.base.getRate(postId) + "\nОцените работу:",
+    "Средняя оценка работы: " + await ctx.base.getRate(postId) + "\nОцените работу:",
     Extra.HTML().markup((m) =>
       m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
