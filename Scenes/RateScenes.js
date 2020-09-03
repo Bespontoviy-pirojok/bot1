@@ -4,6 +4,12 @@ const { Scene, Markup, Extra} = require("./Scenes");
 
 const { ObjectID } = require("mongodb");
 
+async function searchSavedStatus(ctx, userId, postId)
+{
+  let user = await ctx.base.getUser(userId);
+  return user.saved.find((post)=> post._id === postId) != -1;
+}
+
 async function showToRate(ctx) {
   const user = ctx.user,
     show = ctx.session.show,
@@ -162,7 +168,7 @@ new (class RateScene extends Scene {
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 2;
       } else {
-        show.saved_status = undefined;
+        show.saved_status = searchSavedStatus(ctx, ctx.from.id, show.array[show.indexWork]._id);
         show.rated_status = undefined;
         show.status = "one";
         await showToRate(ctx);
