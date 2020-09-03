@@ -7,7 +7,7 @@ const { ObjectID } = require("mongodb");
 async function findSavedStatus(ctx, userId, postId)
 {
   let user = await ctx.base.getUser(userId);
-  return user.saved.find((post)=> post._id === postId) !== undefined;
+  return user.saved.find((post)=> post._id === postId) != undefined;
 }
 
 async function showToRate(ctx) {
