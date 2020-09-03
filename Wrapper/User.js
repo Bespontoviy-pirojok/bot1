@@ -72,13 +72,13 @@ class User extends Wrapper {
     postId =
       postId || (posts && posts[show.indexWork] && posts[show.indexWork]._id) || -1;
     if (postId === -1) {
-      ctx.reply("Здесь пока ничего нет");
+      ctx.reply("Здесь пока ничего нет", Markup.keyboard(["⬅ Назад"]).resize().extra());
       ctx.session.show.messageSize = 1;
       return 1;
     }
     const post = await ctx.base.getPost(postId);
     if (post === undefined) {
-      ctx.reply("Пост удалён");
+      ctx.reply("Пост удалён", Markup.keyboard(["⬅ Назад"]).resize().extra());
       ctx.session.show.messageSize = 1;
       return 1;
     }
@@ -121,8 +121,9 @@ class User extends Wrapper {
       if (!works[i].photos) {
         works[i] = await global.DataBaseController.getPost(works[i]._id);
       }
-      works[i] = { _id: works[i]._id, preview: works[i].photos[0] };
+      works[i] = works[i] && { _id: works[i]._id, preview: works[i].photos[0] };
     }
+    works = works.map((obj)=>obj || { _id: 1, preview: "https://thumbs.dreamstime.com/b/simple-vector-circle-red-grunge-rubber-stamp-deleted-item-isolated-white-vector-circle-red-grunge-rubber-stamp-deleted-item-155433969.jpg" });
     // Если нет ничего нового
     if (works.length === 0) {
       show.messageSize = 1;
