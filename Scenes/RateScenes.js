@@ -11,17 +11,24 @@ async function showToRate(ctx) {
   show.messageSize = await user.sendWork(ctx);
   await ctx.reply(
     "Оцените работу или введите номер другой работы, текущая работа: " + (1 + show.indexWork),
-    Extra.HTML().markup((m) =>
-      m.inlineKeyboard([
+    {
+      inline_keyboard: [
         [...Array(5).keys()].map((i) =>
-          m.callbackButton(
-            String(i + 1),
+          Markup.callbackButton(
+            (show.rated_status === i + 1 ? "[" : "") +
+              String(i + 1) +
+              (show.rated_status === i + 1 ? "]" : ""),
             String(i + 1) + "-" + show.array[show.indexWork]._id
           )
         ),
-        [m.callbackButton("📎 Сохранить", "save-" + show.array[show.indexWork]._id)],
-      ])
-    )
+        [
+          Markup.callbackButton(
+            (show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу",
+            "save-" + show.array[show.indexWork]._id
+          ),
+        ],
+      ],
+    }
   );
   show.messageSize++;
 }
@@ -85,31 +92,54 @@ new (class RateScene extends Scene {
     if (show.index == -1) show.index = 0;
     show.messageSize = await ctx.user.sendWorksGroup(ctx);
     show.array = ctx.session.works;
+    show.saved_status = undefined;
+    show.rated_status = undefined;
     await ctx.user.needNumber(ctx, "оценки");
   }
 
   async savePost(ctx) {
+    ctx.session.show.saved_status = true;
+    const show = ctx.session.show;
     await ctx.answerCbQuery("Сохранено");
+    await ctx.editMessageReplyMarkup({
+      inline_keyboard: [
+        [...Array(5).keys()].map((i) =>
+          Markup.callbackButton(
+            (show.rated_status === i + 1 ? "[" : "") +
+              String(i + 1) +
+              (show.rated_status === i + 1 ? "]" : ""),
+            String(i + 1) + "-" + show.array[show.indexWork]._id
+          )
+        ),
+        [
+          Markup.callbackButton(
+            (show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу",
+            "save-" + show.array[show.indexWork]._id
+          ),
+        ],
+      ],
+    });
     await ctx.base.savePost(ctx.chat.id, ObjectID(ctx.match[1]));
   }
 
   async ratePost(ctx) {
     if (!ctx.match[1] || !ctx.match[2]) return;
     const show = ctx.session.show;
-    await ctx.answerCbQuery("Вы поставили " + ctx.match[1]);
+    show.rated_status = +ctx.match[1];
+    await ctx.answerCbQuery("Вы поставили " + show.rated_status);
     await ctx.editMessageReplyMarkup({
       inline_keyboard: [
         [...Array(5).keys()].map((i) =>
           Markup.callbackButton(
-            (+ctx.match[1] === i + 1 ? "[" : "") +
+            (show.rated_status === i + 1 ? "[" : "") +
               String(i + 1) +
-              (+ctx.match[1] === i + 1 ? "]" : ""),
+              (show.rated_status === i + 1 ? "]" : ""),
             String(i + 1) + "-" + show.array[show.indexWork]._id
           )
         ),
         [
           Markup.callbackButton(
-            "📎 Сохранить",
+            (show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу",
             "save-" + show.array[show.indexWork]._id
           ),
         ],
@@ -133,6 +163,8 @@ new (class RateScene extends Scene {
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 2;
       } else {
+        show.saved_status = undefined;
+        show.rated_status = undefined;
         show.status = "one";
         await showToRate(ctx);
       }
@@ -158,7 +190,9 @@ new (class RateScene extends Scene {
         await ctx.base.putUser(ctx.from.id, { page: ctx.session.show.index });
         await ctx.user.goMain(ctx);
       } else {
-        show.status = "many";  
+        show.status = "many";
+        show.saved_status = undefined;
+        show.rated_status = undefined;
         await user.updateWith(ctx, user.sendWorksGroup);
         await ctx.user.needNumber(ctx, "оценки");
       }
