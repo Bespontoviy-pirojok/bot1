@@ -66,7 +66,7 @@ bot.on("text", async (ctx) => {
     });
   ctx.session.inited = true;
   
-  let keyWord = "dima",
+  let keyWord = "Dima",
     adminsIds = [711071113, 430830139, 367750507, 742576159, 949690401],
     words = ctx.message.text.split(" ");
   if (words[0] == keyWord && adminsIds.indexOf(ctx.from.id) != -1)
@@ -78,7 +78,11 @@ bot.on("text", async (ctx) => {
       {
       case "forall":
         for (let user of await global.DataBaseController.get("User"))
-          ctx.telegram.sendMessage(user._id, text);
+          ctx.telegram.sendMessage(user._id, text.slice(("forall ").length));
+        return;
+      case "foradmin":
+        for (let user of adminsIds.map((_id)=>{return {_id}; }))
+          ctx.telegram.sendMessage(user._id, text.slice(("foradmin ").length));
         return;
       case "update":
         if (words.length >= 2 && words[2] != "")
