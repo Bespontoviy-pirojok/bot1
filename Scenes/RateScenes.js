@@ -168,7 +168,8 @@ new (class RateScene extends Scene {
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.messageSize += 2;
       } else {
-        show.saved_status = findSavedStatus(ctx, ctx.from.id, show.array[show.indexWork]._id);
+        show.saved_status = await findSavedStatus(ctx, ctx.from.id, show.array[show.indexWork]._id);
+        console.log(show.saved_status);
         show.rated_status = undefined;
         show.status = "one";
         await showToRate(ctx);
