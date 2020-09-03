@@ -38,7 +38,7 @@ new (class SendWorkScene extends Scene {
   }
   async enter(ctx) {
     const { message_id, chat } = await ctx.reply(
-      "Отправьте фотографии в формате jpeg или png и нажмите кнопку готово.\nПервая фотография будет использоваться в качестве превью к вашей работе",
+      "Выполните следующие действия:\n1. Отправьте все фотографии вашей работы в формате jpeg или png\n2. Нажмите кнопку ✅Готово\n\nПервая фотография будет использоваться в качестве превью к вашей работе",
       Markup.keyboard(["✅ Готово", "⬅ Назад"]).resize().extra()
     );
     ctx.session.caption = [chat.id, message_id];

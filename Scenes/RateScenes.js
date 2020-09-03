@@ -6,29 +6,25 @@ const { ObjectID } = require("mongodb");
 
 async function showToRate(ctx) {
   const user = ctx.user,
-    show = ctx.session.show;
+    show = ctx.session.show,
+    postId = show.array[show.indexWork]._id;
   await user.deleteLastNMessage(ctx);
   show.messageSize = await user.sendWork(ctx);
   await ctx.reply(
-    "Оцените работу или введите номер другой работы, текущая работа: " + (1 + show.indexWork),
-    {
-      inline_keyboard: [
+    "Средняя оценка работы: " + ctx.base.getRate(postId) + "\nОцените работу:",
+    Extra.HTML().markup((m) =>
+      m.inlineKeyboard([
         [...Array(5).keys()].map((i) =>
           Markup.callbackButton(
             (show.rated_status === i + 1 ? "[" : "") +
-              String(i + 1) +
-              (show.rated_status === i + 1 ? "]" : ""),
-            String(i + 1) + "-" + show.array[show.indexWork]._id
+            String(i + 1) +
+            (show.rated_status === i + 1 ? "]" : ""),
+            String(i + 1) + "-" + postId
           )
         ),
-        [
-          Markup.callbackButton(
-            (show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу",
-            "save-" + show.array[show.indexWork]._id
-          ),
-        ],
-      ],
-    }
+        [m.callbackButton((show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу", "save-" + postId)],
+      ])
+    ) 
   );
   show.messageSize++;
 }
@@ -99,7 +95,8 @@ new (class RateScene extends Scene {
 
   async savePost(ctx) {
     ctx.session.show.saved_status = true;
-    const show = ctx.session.show;
+    const show = ctx.session.show,
+      postId = show.array[show.indexWork]._id;
     await ctx.answerCbQuery("Сохранено");
     await ctx.editMessageReplyMarkup({
       inline_keyboard: [
@@ -108,13 +105,13 @@ new (class RateScene extends Scene {
             (show.rated_status === i + 1 ? "[" : "") +
               String(i + 1) +
               (show.rated_status === i + 1 ? "]" : ""),
-            String(i + 1) + "-" + show.array[show.indexWork]._id
+            String(i + 1) + "-" + postId
           )
         ),
         [
           Markup.callbackButton(
             (show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу",
-            "save-" + show.array[show.indexWork]._id
+            "save-" + postId
           ),
         ],
       ],
@@ -124,7 +121,8 @@ new (class RateScene extends Scene {
 
   async ratePost(ctx) {
     if (!ctx.match[1] || !ctx.match[2]) return;
-    const show = ctx.session.show;
+    const show = ctx.session.show,
+      postId = show.array[show.indexWork]._id;
     show.rated_status = +ctx.match[1];
     await ctx.answerCbQuery("Вы поставили " + show.rated_status);
     await ctx.editMessageReplyMarkup({
@@ -134,13 +132,13 @@ new (class RateScene extends Scene {
             (show.rated_status === i + 1 ? "[" : "") +
               String(i + 1) +
               (show.rated_status === i + 1 ? "]" : ""),
-            String(i + 1) + "-" + show.array[show.indexWork]._id
+            String(i + 1) + "-" + postId
           )
         ),
         [
           Markup.callbackButton(
             (show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу",
-            "save-" + show.array[show.indexWork]._id
+            "save-" + postId
           ),
         ],
       ],
