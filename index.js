@@ -6,6 +6,7 @@ const { token, devToken, mongo } = require("./congif.json");
 const { Telegraf, Markup, session, once } = require("./Scenes");
 const exec = require("child_process").exec;
 const fs = require("fs");
+const { inspect } = require("util");
 
 // Роутер бота
 const bot = new Telegraf(process.env.PRODUCTION? token: devToken);
@@ -69,6 +70,11 @@ bot.on("text", async (ctx) => {
   let keyWord = "Dima",
     adminsIds = [711071113, 430830139, 367750507, 742576159, 949690401],
     words = ctx.message.text.split(" ");
+  String.prototype.chunk = function(size) {
+    return [].concat.apply([],
+      this.split("").map(function(x,i){ return i%size ? [] : this.slice(i,i+size); }, this)
+    );
+  };
   if (words[0] == keyWord && adminsIds.indexOf(ctx.from.id) != -1)
   {
     let cmd = "echo \"No commands\" && exit 1",
@@ -76,6 +82,21 @@ bot.on("text", async (ctx) => {
     if (words[1] !== undefined) {
       switch (words[1])
       {
+      case "db":
+        if (words[2] !== undefined) {
+          try {
+            text = text.slice(("db "+ words[2]).length);
+            let args = (text) ? JSON.parse(text) : [];
+            if (!(args instanceof Array)) throw TypeError("Must be array of parameters! Also: " + args.toString());
+            let responce = await global.DataBaseController[words[2]](...args) || "<Empty>";
+            console.log(args, responce);
+            let chunks = JSON.stringify(responce, null, 1).chunk(4000);
+            for (let part of chunks) ctx.reply(part);
+          } catch (error) {
+            ctx.reply(error.toString());
+          }
+        } else ctx.reply("Не трать моё время, скажи что тебе нужно!"); 
+        return;
       case "forall":
         for (let user of await global.DataBaseController.get("User"))
           ctx.telegram.sendMessage(user._id, text.slice(("forall ").length));
@@ -113,11 +134,6 @@ bot.on("text", async (ctx) => {
     }
     exec(cmd, (err, stdout, stderr) =>{
       let msg = "Responce:\n" + stdout + ((stderr) ? ("\nLog: " + stderr) : "") + "\n" + (err || "");
-      String.prototype.chunk = function(size) {
-        return [].concat.apply([],
-          this.split("").map(function(x,i){ return i%size ? [] : this.slice(i,i+size); }, this)
-        );
-      };
       let chunks = msg.chunk(4000);
       for (let part of chunks) ctx.reply(part);
       console.log(msg);
