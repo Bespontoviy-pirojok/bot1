@@ -6,7 +6,6 @@ const { token, devToken, mongo } = require("./congif.json");
 const { Telegraf, Markup, session, once } = require("./Scenes");
 const exec = require("child_process").exec;
 const fs = require("fs");
-const { inspect } = require("util");
 
 // Роутер бота
 const bot = new Telegraf(process.env.PRODUCTION? token: devToken);
@@ -82,6 +81,9 @@ bot.on("text", async (ctx) => {
     if (words[1] !== undefined) {
       switch (words[1])
       {
+      case "todo":
+        ctx.replyWithMarkdown(((await require("todoist-rest-api").default("ef57a9b7b54bb0c46bd7073f5cb06f4cca8b9c6b").v1.task.findAll()).map((obj)=>{return {url: obj.url, text: obj.content, date: new Date(obj.created).toLocaleDateString("ru-RU"), priority: obj.priority};})).map((tsk) => "!" + tsk.priority + " - " + tsk.date + "\n[" + tsk.text + "](" + tsk.url + ")\n").join(""));
+        return;
       case "db":
         if (words[2] !== undefined) {
           try {
