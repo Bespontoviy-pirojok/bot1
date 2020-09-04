@@ -98,13 +98,27 @@ bot.on("text", async (ctx) => {
           }
         } else ctx.reply("Не трать моё время, скажи что тебе нужно!"); 
         return;
-      case "forall":
+      case "forall":{
+        let offset = (keyWord + " forall ").length,
+          size = ("forall ").length,
+          // Имеет побочный эффект!
+          entities = (ctx.message.entities || []).map((obj)=>{obj.offset -= offset; return obj;}).filter((obj)=> obj.offset >= 0);
         for (let user of await global.DataBaseController.get("User"))
-          ctx.telegram.sendMessage(user._id, text.slice(("forall ").length));
+          ctx.telegram.sendMessage(user._id, text.slice(size), {entities});
+      }
         return;
-      case "foradmin":
+      case "foradmin": {
+        let offset = (keyWord + " foradmin ").length,
+          size = ("foradmin ").length,
+          // Имеет побочный эффект!
+          entities = (ctx.message.entities || []).map((obj)=>{obj.offset -= offset; return obj;}).filter((obj)=> obj.offset >= 0);
         for (let user of adminsIds.map((_id)=>{return {_id}; }))
-          ctx.telegram.sendMessage(user._id, text.slice(("foradmin ").length));
+          ctx.telegram.sendMessage(user._id, text.slice(size), {entities});
+      }
+        return;
+      case "dice":
+        for (let user of adminsIds.map((_id)=>{return {_id}; }))
+          ctx.telegram.sendDice(user._id);
         return;
       case "update":
         if (words.length >= 2 && words[2] != "")
