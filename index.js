@@ -89,7 +89,6 @@ bot.on("text", async (ctx) => {
             let args = (text) ? JSON.parse(text) : [];
             if (!(args instanceof Array)) throw TypeError("Must be array of parameters! Also: " + args.toString());
             let responce = await global.DataBaseController[words[2]](...args) || "<Empty>";
-            console.log(args, responce);
             let chunks = JSON.stringify(responce, null, 1).chunk(4000);
             for (let part of chunks) ctx.reply(part);
           } catch (error) {
