@@ -25,7 +25,7 @@ new (class SavedScene extends Scene {
     };
     console.log(saved);
     //  Отправка пользователю работ
-    ctx.session.show.messageSize = await ctx.user.sendPage(ctx);
+    ctx.session.show.responsedMessageCounter = await ctx.user.sendPage(ctx);
     await ctx.user.needNumber(ctx, "просмотра");
   }
 
@@ -41,11 +41,11 @@ new (class SavedScene extends Scene {
           "Работы с таким номером не существует, попробуйте заново."
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
-        show.messageSize += 2;
+        show.responsedMessageCounter += 2;
       } else {
         show.status = "one";
         await user.deleteLastNMessage(ctx);
-        show.messageSize = await ctx.user.sendWork(ctx);
+        show.responsedMessageCounter = await ctx.user.sendWork(ctx);
       }
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       return;
@@ -75,7 +75,7 @@ new (class SavedScene extends Scene {
       break;
     default:
       ctx.reply("Хуйню не неси");
-      ctx.session.show.messageSize++;
+      ctx.session.show.responsedMessageCounter++;
     }
   }
 })();

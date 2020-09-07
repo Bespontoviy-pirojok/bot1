@@ -44,12 +44,12 @@ class User extends Wrapper {
   // Обновление показываемого пользователю
   async updateWith(ctx, update) {
     await this.deleteLastNMessage(ctx);
-    ctx.session.show.messageSize = await update.call(this, ctx);
+    ctx.session.show.responsedMessageCounter = await update.call(this, ctx);
   }
   // Удаление послених N сообщений
   async deleteLastNMessage(ctx, n) {
     this.alloc(ctx); //  Нужно тормознуть процессы для пользователя, так как удаление - дорогорстояющая операция
-    n = n || ctx.session.show.messageSize + 1;
+    n = n || ctx.session.show.responsedMessageCounter + 1;
     if (n < 1) return;
     /*
       Удалить можно только то сообщение, на которое указывает контекст
@@ -73,13 +73,13 @@ class User extends Wrapper {
       postId || (posts && posts[show.indexWork] && posts[show.indexWork]._id) || -1;
     if (postId === -1) {
       ctx.reply("Здесь пока ничего нет", Markup.keyboard(["⬅ Назад"]).resize().extra());
-      ctx.session.show.messageSize = 1;
+      ctx.session.show.responsedMessageCounter = 1;
       return 1;
     }
     const post = await ctx.base.getPost(postId);
     if (post === undefined) {
       ctx.reply("Пост удалён", Markup.keyboard(["⬅ Назад"]).resize().extra());
-      ctx.session.show.messageSize = 1;
+      ctx.session.show.responsedMessageCounter = 1;
       return 1;
     }
     // Дополняем описание информацией об оценках
@@ -102,7 +102,7 @@ class User extends Wrapper {
     await ctx.reply(msg, Markup.keyboard(["⬅ Назад"]).resize().extra());
     size += 1; // Не забываем про то что каждое новое сообщение влияет на размер сцены
 
-    ctx.session.show.messageSize = size;
+    ctx.session.show.responsedMessageCounter = size;
     return size;
   }
 
@@ -126,7 +126,7 @@ class User extends Wrapper {
     works = works.map((obj)=>obj || { _id: 1, preview: "https://thumbs.dreamstime.com/b/simple-vector-circle-red-grunge-rubber-stamp-deleted-item-isolated-white-vector-circle-red-grunge-rubber-stamp-deleted-item-155433969.jpg" });
     // Если нет ничего нового
     if (works.length === 0) {
-      show.messageSize = 1;
+      show.responsedMessageCounter = 1;
       ctx.reply(ctx.session.show.empty || "Пусто...", Markup.keyboard(["⬅ Назад"]).resize().extra());
       return 1;
     }
@@ -168,7 +168,7 @@ class User extends Wrapper {
         ["⏪ Предыдущая страница", "⏩ Следующая страница"],
         ["⬅ Назад"],
       ]).resize().extra());
-      ctx.session.show.responseCounter += 1;
+      ctx.session.show.responsedMessageCounter += 1;
     }
   }
   
@@ -187,7 +187,7 @@ class User extends Wrapper {
   async replyWithPageNavigationKeyboard(ctx, message) {
     const keyboard = this.generatePageNavigationKeyboard(ctx);
     await ctx.reply(message, Markup.keyboard(keyboard));
-    ctx.session.show.responseCounter += 1;
+    ctx.session.show.responsedMessageCounter += 1;
   }
   ///////////////////////////////////
 

@@ -27,7 +27,7 @@ class Wrapper {
   //  Проверяет не хотят ли задудосить сервер и блокирует пользователя на 5 секунд
   async checkDos(ctx, callback) {
     const show = ctx.session.show;
-    if (show.messageSize > 35) {
+    if (show.responsedMessageCounter > 35) {
       this.alloc(ctx);
       console.log("busy");
       await setTimeout(() => {

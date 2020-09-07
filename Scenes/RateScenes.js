@@ -16,7 +16,7 @@ async function showToRate(ctx) {
     postId = show.array[show.indexWork]._id,
     rate = await ctx.base.getRate(postId);
   await user.deleteLastNMessage(ctx);
-  show.messageSize = await user.sendWork(ctx);
+  show.responsedMessageCounter = await user.sendWork(ctx);
   await ctx.reply(
     (rate ? "Средняя оценка работы: " + rate + "\nОцените работу:" : "Работу ещё никто не оценил, станьте первым!"),
     Extra.HTML().markup((m) =>
@@ -33,7 +33,7 @@ async function showToRate(ctx) {
       ])
     ) 
   );
-  show.messageSize++;
+  show.responsedMessageCounter++;
 }
 
 var buttonsArray = [
@@ -82,18 +82,13 @@ new (class RateScene extends Scene {
   }
 
   async enter(ctx) {
-    const { message_id, chat } = await ctx.reply(
-      "Оценка работ",
-      Markup.keyboard(fullButtonsMarkup(0))
-        .resize()
-        .extra()
-    );
+    const { message_id, chat } = await ctx.reply("Оценка работ");
     ctx.session.caption = [chat.id, message_id];
       
     const user = await ctx.base.getUser(ctx.from.id);
     let show = (ctx.session.show = { index: user.page, status: "many" });
     if (show.index == -1) show.index = 0;
-    show.messageSize = await ctx.user.sendWorksGroup(ctx);
+    show.responsedMessageCounter = await ctx.user.sendWorksGroup(ctx);
     show.array = ctx.session.works;
     show.saved_status = undefined;
     show.rated_status = undefined;
@@ -166,7 +161,7 @@ new (class RateScene extends Scene {
           "Работы с таким номером не существует, попробуйте заново."
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
-        show.messageSize += 2;
+        show.responsedMessageCounter += 2;
       } else {
         show.saved_status = await findSavedStatus(ctx, ctx.from.id, show.array[show.indexWork]._id);
         console.log(show.saved_status);
@@ -177,7 +172,7 @@ new (class RateScene extends Scene {
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       return;
     }
-    
+
     switch (ctx.message.text) {
     case "⏩ Следующая страница":
       show.status = "many";

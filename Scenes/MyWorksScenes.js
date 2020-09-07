@@ -10,10 +10,7 @@ new (class MyWorksScene extends Scene {
   }
 
   async enter(ctx) {
-    const { message_id, chat } = await ctx.reply(
-      "🏆 Оценки моих работ",
-      Markup.keyboard([["⏩ Следующая страница", "⏪ Предыдущая страница"], ["⬅ Назад"]]).resize().extra()
-    );
+    const { message_id, chat } = await ctx.reply("🏆 Оценки моих работ");
     ctx.session.caption = [chat.id, message_id];
     const posted = (await ctx.base.getUser(ctx.from.id)).posted;
     //  Индексация кеша
@@ -23,7 +20,7 @@ new (class MyWorksScene extends Scene {
       array: posted,
       status: "many",
     };
-    ctx.session.show.messageSize = await ctx.user.sendPage(ctx);
+    ctx.session.show.responsedMessageCounter = await ctx.user.sendPage(ctx);
     await ctx.user.needNumber(ctx, "просмотра оценки");
   }
 
@@ -39,11 +36,11 @@ new (class MyWorksScene extends Scene {
           "Работы с таким номером не существует, попробуйте заново."
         );
         await user.checkDos(ctx, user.deleteLastNMessage);
-        show.messageSize += 2;
+        show.responsedMessageCounter += 2;
       } else {
         show.status = "one";
         await user.deleteLastNMessage(ctx);
-        show.messageSize = await ctx.user.sendWork(ctx);
+        show.responsedMessageCounter = await ctx.user.sendWork(ctx);
       }
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       return;
