@@ -11,10 +11,7 @@ new (class SavedScene extends Scene {
   }
 
   async enter(ctx) {
-    const { message_id, chat } = await ctx.reply(
-      "Сохраненные",
-      Markup.keyboard([["⏪ Предыдущая страница", "⏩ Следующая страница"], ["⬅ Назад"]]).resize().extra()
-    );
+    const { message_id, chat } = await ctx.reply("Сохраненные");
     ctx.session.caption = [chat.id, message_id];
     //  Получение объекта пользователя из базы
     const saved = (await ctx.base.getUser(ctx.from.id)).saved;

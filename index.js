@@ -37,6 +37,7 @@ bot.use(
   base.middleware(),
   global.Scenes.stage.middleware()
 );
+
 // bot.use(Telegraf.log());
 // console.log(global.ScenesController.scenesId());
 
@@ -134,7 +135,7 @@ bot.on("text", async (ctx) => {
         if (words.length >= 2 && words[2] != "")
         {
           let fileName = words[2];
-          fs.readFile(fileName, { encoding: "utf-8" }, (error, data) => {
+          fs.readFile(fileName, { encoding: "utf-8" }, (error) => {
             if (error) ctx.reply(error);
             else ctx.telegram.sendDocument(ctx.from.id, {
               source: fileName,

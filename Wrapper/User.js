@@ -168,9 +168,28 @@ class User extends Wrapper {
         ["⏪ Предыдущая страница", "⏩ Следующая страница"],
         ["⬅ Назад"],
       ]).resize().extra());
-      ctx.session.show.messageSize += 1;
+      ctx.session.show.responseCounter += 1;
     }
   }
+  
+  ///Зона отрефакторенного кода///////
+  generatePageNavigationKeyboard(ctx) {
+    if (ctx.session.works && ctx.session.works.length !== 0 && ctx.session.show.index !== -1) {
+      return [
+        ["⏪ Предыдущая страница", "⏩ Следующая страница"],
+        ["⬅ Назад"]
+      ];
+    } else {
+      return ["⬅ Назад"];
+    }
+  }
+  
+  async replyWithPageNavigationKeyboard(ctx, message) {
+    const keyboard = this.generatePageNavigationKeyboard(ctx);
+    await ctx.reply(message, Markup.keyboard(keyboard));
+    ctx.session.show.responseCounter += 1;
+  }
+  ///////////////////////////////////
 
   //  Корневая сцена
   async goMain(ctx) {
