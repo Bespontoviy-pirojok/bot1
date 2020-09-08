@@ -43,8 +43,9 @@ class User extends Wrapper {
   }
   // Обновление показываемого пользователю
   async updateWith(ctx, update) {
-    await this.deleteLastNMessage(ctx);
+    let count = ctx.session.show.responsedMessageCounter + 1;
     ctx.session.show.responsedMessageCounter = await update.call(this, ctx);
+    this.deleteLastNMessage(ctx, count);
   }
   // Удаление послених N сообщений
   async deleteLastNMessage(ctx, n) {

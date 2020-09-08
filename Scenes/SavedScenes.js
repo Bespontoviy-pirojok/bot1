@@ -22,11 +22,10 @@ new (class SavedScene extends Scene {
       array: saved,
       status: "many",
       empty: "Вы пока не сохранили не одну работу.\nДля сохранения работы откройте её и нажмите кнопку \"Сохранить\"",
+      for: "просмотра",
     };
-    console.log(saved);
     //  Отправка пользователю работ
     ctx.session.show.responsedMessageCounter = await ctx.user.sendPage(ctx);
-    await ctx.user.needNumber(ctx, "просмотра");
   }
 
   async main(ctx) {
@@ -37,9 +36,7 @@ new (class SavedScene extends Scene {
       show.indexWork = +ctx.message.text - 1;
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       if (!show.array[show.indexWork]) {
-        await ctx.reply(
-          "Работы с таким номером не существует, попробуйте заново."
-        );
+        await ctx.reply("Работы с таким номером не существует, попробуйте заново.");
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.responsedMessageCounter += 2;
       } else {
