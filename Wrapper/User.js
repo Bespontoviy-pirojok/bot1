@@ -61,8 +61,10 @@ class User extends Wrapper {
     while (n--) {
       messageToDelete.push(ctx.update.message.message_id--);
     }
-    // Делаем массив запросов на удаление и дожидаемся когда все они будут завершены
-    await Promise.all(messageToDelete.map(async (messageId) => await (ctx.telegram.deleteMessage(ctx.from.id, messageId).catch())));
+    // Делаем массив запросов на удаление 
+    let promises = messageToDelete.map((messageId) => ctx.telegram.deleteMessage(ctx.from.id, messageId).catch(console.log));
+    // Дожидаемся когда все они будут завершены
+    (await Promise.all(promises));
     this.free(ctx); //  Конец сложных запросов, можно разжать булки
   }
   //  Отправка работ
@@ -117,13 +119,17 @@ class User extends Wrapper {
     if ("" + show.index == "NaN") show.index = -1;
     //  Получение старницы с постами
     let works = posts.slice(perPage * page, perPage * (page + 1));
-    for (let i = 0; i < works.length; i++) {
-      if (!works[i].photos) {
-        works[i] = await global.DataBaseController.getPost(works[i]._id);
-      }
-      works[i] = works[i] && { _id: works[i]._id, preview: works[i].photos[0] };
-    }
-    works = works.map((obj)=>obj || { _id: 1, preview: "https://thumbs.dreamstime.com/b/simple-vector-circle-red-grunge-rubber-stamp-deleted-item-isolated-white-vector-circle-red-grunge-rubber-stamp-deleted-item-155433969.jpg" });
+    // Проверяем есть ли у нас нужная информация, если нет просим
+    works = works.map((work)=>{
+      if (work.photos !== undefined || work.preview !== undefined)
+        return work;
+      else
+        return global.DataBaseController.getPost(work._id); 
+    });
+    // Ждём, а затем правим посты
+    works = (await Promise.all(works))
+      .map((work)=>work && ((work.preview && work) || { _id: work._id, preview: work.photos[0] }))
+      .map((obj)=>obj || { _id: 1, preview: "https://thumbs.dreamstime.com/b/simple-vector-circle-red-grunge-rubber-stamp-deleted-item-isolated-white-vector-circle-red-grunge-rubber-stamp-deleted-item-155433969.jpg" });
     // Если нет ничего нового
     if (works.length === 0) {
       show.responsedMessageCounter = 1;
@@ -146,7 +152,7 @@ class User extends Wrapper {
     
     //  Сколько места занимает страница
     show.responsedMessageCounter = works.length;
-    this.needNumber(ctx);
+    await this.needNumber(ctx);
     return show.responsedMessageCounter;
   }
 
@@ -157,7 +163,7 @@ class User extends Wrapper {
       show = ctx.session.show;
     show.size = posts.length;
     [ posts, ctx.session.show.array ] = [ ctx.session.show.array, posts ];
-    let size = this.sendPage(ctx, page);
+    let size = await this.sendPage(ctx, page);
     [ posts, ctx.session.show.array ] = [ ctx.session.show.array, posts ];
     return size;
   }
