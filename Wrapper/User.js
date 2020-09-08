@@ -45,7 +45,7 @@ class User extends Wrapper {
   async updateWith(ctx, update) {
     let count = ctx.session.show.responsedMessageCounter + 1;
     ctx.session.show.responsedMessageCounter = await update.call(this, ctx);
-    this.deleteLastNMessage(ctx, count);
+    await this.deleteLastNMessage(ctx, count);
   }
   // Удаление послених N сообщений
   async deleteLastNMessage(ctx, n) {
@@ -57,13 +57,12 @@ class User extends Wrapper {
       Снизу - указателя для сообщений, который смещается на N,
       а затем удаляет все последующие посты
      */
+    let messageToDelete = [];
     while (n--) {
-      //  Само удадение
-      // TODO: Как попытка исправления флекса нужно переделать через что-то async
-      ctx.deleteMessage().catch();
-      // if ((await ctx.deleteMessage().catch(() => -1)) === -1) break;
-      ctx.update.message.message_id--;
+      messageToDelete.push(ctx.update.message.message_id--);
     }
+    // Делаем массив запросов на удаление и дожидаемся когда все они будут завершены
+    await Promise.all(messageToDelete.map(async (messageId) => await (ctx.telegram.deleteMessage(ctx.from.id, messageId).catch())));
     this.free(ctx); //  Конец сложных запросов, можно разжать булки
   }
   //  Отправка работ
