@@ -1,4 +1,4 @@
-const { Scene, Markup } = require("./Scenes");
+const { Scene } = require("./Scenes");
 
 
 new (class SavedScene extends Scene {
@@ -55,12 +55,10 @@ new (class SavedScene extends Scene {
     case "⏩ Следующая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendPage);
-      await ctx.user.needNumber(ctx, "просмотра");
       break;
     case "⏪ Предыдущая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendPage);
-      await ctx.user.needNumber(ctx, "просмотра");
       break;
     case "⬅ Назад":
       if (show.status === "many")
@@ -70,12 +68,10 @@ new (class SavedScene extends Scene {
       } else {
         show.status = "many";  
         await user.updateWith(ctx, user.sendPage);
-        await ctx.user.needNumber(ctx, "просмотра оценки");
       }
       break;
     default:
-      ctx.reply("Хуйню не неси");
-      ctx.session.show.responsedMessageCounter++;
+      show.responsedMessageCounter++;
     }
   }
 })();

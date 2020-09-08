@@ -143,8 +143,11 @@ class User extends Wrapper {
       });
     //  Кешируем работы
     ctx.session.works = works;
+    
     //  Сколько места занимает страница
-    return works.length;
+    show.responsedMessageCounter = works.length;
+    this.needNumber(ctx);
+    return show.responsedMessageCounter;
   }
 
   //  ОТПРАВЛЯЕТ страницу с ПРЕВЬЮ из ленты ПОЛЬЗОВАТЕЛЮ
@@ -159,37 +162,18 @@ class User extends Wrapper {
     return size;
   }
 
-  async needNumber(ctx, for_)
+  async needNumber(ctx)
   {
     if (ctx.session.works && ctx.session.works.length !== 0 && ctx.session.show.index !== -1)
     {
       // Я в душе не ебу, что здесь, но тут таск никиты
-      await ctx.reply("Введите номер работы для " + for_, Markup.keyboard([
+      await ctx.reply("Введите номер работы для " + (ctx.session.show.for || "просмотра"), Markup.keyboard([
         ["⏪ Предыдущая страница", "⏩ Следующая страница"],
         ["⬅ Назад"],
       ]).resize().extra());
       ctx.session.show.responsedMessageCounter += 1;
     }
   }
-  
-  ///Зона отрефакторенного кода///////
-  generatePageNavigationKeyboard(ctx) {
-    if (ctx.session.works && ctx.session.works.length !== 0 && ctx.session.show.index !== -1) {
-      return [
-        ["⏪ Предыдущая страница", "⏩ Следующая страница"],
-        ["⬅ Назад"]
-      ];
-    } else {
-      return ["⬅ Назад"];
-    }
-  }
-  
-  async replyWithPageNavigationKeyboard(ctx, message) {
-    const keyboard = this.generatePageNavigationKeyboard(ctx);
-    await ctx.reply(message, Markup.keyboard(keyboard));
-    ctx.session.show.responsedMessageCounter += 1;
-  }
-  ///////////////////////////////////
 
   //  Корневая сцена
   async goMain(ctx) {

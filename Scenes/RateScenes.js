@@ -61,13 +61,6 @@ function photoRateButtonsGenerator(btnCount){
   return res;
 }
 
-function fullButtonsMarkup(btnCount){
-  let res = photoRateButtonsGenerator(btnCount);
-  res.push(buttonsArray[0]);
-  res.push(buttonsArray[1]);
-  return res;
-}
-
 new (class RateScene extends Scene {
   constructor() {
     super("Rate");
@@ -86,13 +79,16 @@ new (class RateScene extends Scene {
     ctx.session.caption = [chat.id, message_id];
       
     const user = await ctx.base.getUser(ctx.from.id);
-    let show = (ctx.session.show = { index: user.page, status: "many" });
+    let show = (ctx.session.show = { 
+      index: user.page,
+      status: "many",
+      for: "оценки",
+    });
     if (show.index == -1) show.index = 0;
     show.responsedMessageCounter = await ctx.user.sendWorksGroup(ctx);
     show.array = ctx.session.works;
     show.saved_status = undefined;
     show.rated_status = undefined;
-    await ctx.user.needNumber(ctx, "оценки");
   }
 
   async savePost(ctx) {
@@ -157,9 +153,7 @@ new (class RateScene extends Scene {
       show.indexWork = +ctx.message.text - 1;
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       if (!show.array[show.indexWork]) {
-        await ctx.reply(
-          "Работы с таким номером не существует, попробуйте заново."
-        );
+        await ctx.reply("Работы с таким номером не существует, попробуйте заново.");
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.responsedMessageCounter += 2;
       } else {
@@ -177,12 +171,10 @@ new (class RateScene extends Scene {
     case "⏩ Следующая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendWorksGroup);
-      await ctx.user.needNumber(ctx, "оценки");
       break;
     case "⏪ Предыдущая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
-      await ctx.user.needNumber(ctx, "оценки");
       break;
     case "⬅ Назад":
       if (show.status === "many")
@@ -195,9 +187,10 @@ new (class RateScene extends Scene {
         show.saved_status = undefined;
         show.rated_status = undefined;
         await user.updateWith(ctx, user.sendWorksGroup);
-        await ctx.user.needNumber(ctx, "оценки");
       }
       break;
+    default:
+      show.responsedMessageCounter++;
     }
   }
 })();

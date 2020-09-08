@@ -1,4 +1,4 @@
-const { Scene, Markup } = require("./Scenes");
+const { Scene } = require("./Scenes");
 
 new (class MyWorksScene extends Scene {
   constructor() {
@@ -19,9 +19,9 @@ new (class MyWorksScene extends Scene {
       size: posted.length,
       array: posted,
       status: "many",
+      for: "просмотра оценки",
     };
     ctx.session.show.responsedMessageCounter = await ctx.user.sendPage(ctx);
-    await ctx.user.needNumber(ctx, "просмотра оценки");
   }
 
   async main(ctx) {
@@ -50,12 +50,10 @@ new (class MyWorksScene extends Scene {
     case "⏩ Следующая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendPage);
-      await ctx.user.needNumber(ctx, "просмотра оценки");      
       break;
     case "⏪ Предыдущая страница":
       show.status = "many";
       await user.updateWith(user.shiftIndex(ctx, 1), user.sendPage);
-      await ctx.user.needNumber(ctx, "просмотра оценки");
       break;
     case "⬅ Назад":
       if (show.status === "many")
@@ -65,9 +63,10 @@ new (class MyWorksScene extends Scene {
       } else {
         show.status = "many";  
         await user.updateWith(ctx, user.sendPage);
-        await ctx.user.needNumber(ctx, "просмотра оценки");
       }
       break;
+    default:
+      show.responsedMessageCounter++;
     }
   }
 })();
