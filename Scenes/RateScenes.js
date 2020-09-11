@@ -36,31 +36,6 @@ async function showToRate(ctx) {
   show.responsedMessageCounter++;
 }
 
-var buttonsArray = [
-  ["⏪ Предыдущая страница", "⏩ Следующая страница"],
-  ["⬅ Назад"],
-];
-
-function photoRateButtonsGenerator(btnCount){
-  let res = [[]];
-  if (btnCount > 0 && btnCount <= 5) {
-    for (let i = 1; i <= btnCount; ++i) {
-      res[0].push(i.toString());
-    }
-  } else if (btnCount > 0 && btnCount <= 8) {
-    res = [[], []];
-    const separator = ((btnCount+1) / 2) | 0;
-    for (let i = 1; i <= separator; ++i) {
-      res[0].push(i.toString());
-    }
-    for (let i = separator + 1; i <= btnCount; ++i) {
-      res[1].push(i.toString());
-    }
-  }
-  console.log(btnCount, res);
-  return res;
-}
-
 new (class RateScene extends Scene {
   constructor() {
     super("Rate");

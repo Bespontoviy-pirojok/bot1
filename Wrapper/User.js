@@ -111,7 +111,7 @@ class User extends Wrapper {
   async sendPage(ctx, page) {
     //  Получение постов
     let posts = ctx.session.show.array,
-      perPage = 8, // Сколько превью выводим на одну страницу
+      perPage = 4, // Сколько превью выводим на одну страницу
       show = ctx.session.show;
     //  Количество страниц
     show.size = ((ctx.session.show.size + perPage - 1) / perPage) | 0;
@@ -172,11 +172,34 @@ class User extends Wrapper {
   {
     if (ctx.session.works && ctx.session.works.length !== 0 && ctx.session.show.index !== -1)
     {
-      // Я в душе не ебу, что здесь, но тут таск никиты
-      await ctx.reply("Введите номер работы для " + (ctx.session.show.for || "просмотра"), Markup.keyboard([
+      var buttonsArray = [
         ["⏪ Предыдущая страница", "⏩ Следующая страница"],
         ["⬅ Назад"],
-      ]).resize().extra());
+      ];
+      function photoRateButtonsGenerator(btnCount){
+        let res = [];
+        if (btnCount > 0 && btnCount < 5) {
+          res = [[]];
+          for (let i = 1; i <= btnCount; ++i) {
+            res[0].push(i.toString());
+          }
+        } else if (btnCount > 0 && btnCount <= 8) {
+          res = [[], []];
+          const separator = ((btnCount+1) / 2) | 0;
+          for (let i = 1; i <= separator; ++i) {
+            res[0].push(i.toString());
+          }
+          for (let i = separator + 1; i <= btnCount; ++i) {
+            res[1].push(i.toString());
+          }
+        }
+        console.log(btnCount, res);
+        return res.concat(...bottonsArray);
+      }
+      await ctx.reply(
+        "Введите номер работы для " + (ctx.session.show.for || "просмотра"),
+        Markup.keyboard(photoRateButtonsGenerator(ctx.session.works.length)).resize().extra()
+      );
       ctx.session.show.responsedMessageCounter += 1;
     }
   }
