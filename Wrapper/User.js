@@ -1,5 +1,6 @@
 const Wrapper = require("./Wrapper");
 const {Markup} = require("telegraf");
+const { async } = require("q");
 
 class User extends Wrapper {
   constructor() {
@@ -91,7 +92,7 @@ class User extends Wrapper {
     await ctx.telegram.sendMediaGroup(
       ctx.from.id,
       this.typedAsPhoto(post.photos)
-    ).catch((err) => {
+    ).catch(async (err) => {
       console.log("Error", err.on);
       await ctx.reply("error");
       size = 1;
