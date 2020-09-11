@@ -15,7 +15,6 @@ async function showToRate(ctx) {
     show = ctx.session.show,
     postId = show.array[show.indexWork]._id,
     rate = await ctx.base.getRate(postId);
-  await user.deleteLastNMessage(ctx);
   show.responsedMessageCounter = await user.sendWork(ctx);
   await ctx.reply(
     (rate ? "Средняя оценка работы: " + rate + "\nОцените работу:" : "Работу ещё никто не оценил, станьте первым!"),
@@ -136,7 +135,7 @@ new (class RateScene extends Scene {
         console.log(show.saved_status);
         show.rated_status = undefined;
         show.status = "one";
-        await showToRate(ctx);
+        await user.update(ctx, showToRate);
       }
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       return;

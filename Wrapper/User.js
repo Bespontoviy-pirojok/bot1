@@ -175,26 +175,26 @@ class User extends Wrapper {
       var buttonsArray = [
         ["⏪ Предыдущая страница", "⏩ Следующая страница"],
         ["⬅ Назад"],
-      ];
+      ],
+        numButtons = ["1⃣", "2⃣", "3⃣", "4⃣"];
       function photoRateButtonsGenerator(btnCount){
         let res = [];
         if (btnCount > 0 && btnCount < 5) {
           res = [[]];
           for (let i = 1; i <= btnCount; ++i) {
-            res[0].push(i.toString());
+            res[0].push(numButtons[i-1]);
           }
         } else if (btnCount > 0 && btnCount <= 8) {
           res = [[], []];
           const separator = ((btnCount+1) / 2) | 0;
           for (let i = 1; i <= separator; ++i) {
-            res[0].push(i.toString());
+            res[0].push(numButtons[i-1]);
           }
           for (let i = separator + 1; i <= btnCount; ++i) {
-            res[1].push(i.toString());
+            res[1].push(numButtons[i-1]);
           }
         }
         res = res.concat(buttonsArray);
-        console.log(btnCount, res);
         return res;
       }
       await ctx.reply(
