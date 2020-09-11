@@ -31,9 +31,10 @@ new (class SavedScene extends Scene {
   async main(ctx) {
     const user = ctx.user,
       show = ctx.session.show;
+    let index = -1;
     
-    if (/[1-8]/.test(ctx.message.text)) {
-      show.indexWork = +ctx.message.text - 1;
+    if ((index = ["1⃣", "2⃣", "3⃣", "4⃣"].indexOf(ctx.message.text)) != -1) {
+      show.indexWork = index;
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       if (!show.array[show.indexWork]) {
         await ctx.reply("Работы с таким номером не существует, попробуйте заново.");
@@ -41,8 +42,7 @@ new (class SavedScene extends Scene {
         show.responsedMessageCounter += 2;
       } else {
         show.status = "one";
-        await user.deleteLastNMessage(ctx);
-        show.responsedMessageCounter = await ctx.user.sendWork(ctx);
+        await user.updateWith(ctx, user.sendWork);
       }
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       return;

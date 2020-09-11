@@ -91,7 +91,11 @@ class User extends Wrapper {
     await ctx.telegram.sendMediaGroup(
       ctx.from.id,
       this.typedAsPhoto(post.photos)
-    );
+    ).catch((err) => {
+      console.log("Error", err.on);
+      await ctx.reply("error");
+      size = 1;
+    });
     
     // Заготавливаем комментарий к работе
     let msg = ((description) ? `Описание: \n${description}` : "") + "\nДата публикации: " + (new Date(post.time)).toLocaleDateString("ru-RU", { month: "long", day: "numeric" });
@@ -198,7 +202,7 @@ class User extends Wrapper {
         return res;
       }
       await ctx.reply(
-        "Введите номер работы для " + (ctx.session.show.for || "просмотра"),
+        "Нажмите на номер работы для " + (ctx.session.show.for || "просмотра"),
         Markup.keyboard(photoRateButtonsGenerator(ctx.session.works.length)).resize().extra()
       );
       ctx.session.show.responsedMessageCounter += 1;
