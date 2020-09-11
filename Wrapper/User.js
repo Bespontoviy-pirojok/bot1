@@ -193,8 +193,9 @@ class User extends Wrapper {
             res[1].push(i.toString());
           }
         }
+        res = res.concat(buttonsArray);
         console.log(btnCount, res);
-        return res.concat(...buttonsArray);
+        return res;
       }
       await ctx.reply(
         "Введите номер работы для " + (ctx.session.show.for || "просмотра"),
