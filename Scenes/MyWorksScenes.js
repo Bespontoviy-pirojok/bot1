@@ -33,9 +33,7 @@ new (class MyWorksScene extends Scene {
       show.indexWork = index;
       [show.array, ctx.session.works] = [ctx.session.works, show.array];
       if (!show.array[show.indexWork]) {
-        await ctx.reply(
-          "Работы с таким номером не существует, попробуйте заново."
-        );
+        await ctx.reply("Работы с таким номером не существует, попробуйте заново.");
         await user.checkDos(ctx, user.deleteLastNMessage);
         show.responsedMessageCounter += 2;
       } else {

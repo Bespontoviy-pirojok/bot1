@@ -52,6 +52,7 @@ class User extends Wrapper {
   async deleteLastNMessage(ctx, n) {
     this.alloc(ctx); //  Нужно тормознуть процессы для пользователя, так как удаление - дорогорстояющая операция
     n = n || ctx.session.show.responsedMessageCounter + 1;
+    console.log("DeletN: ", n);
     if (n < 1) return;
     /*
       Удалить можно только то сообщение, на которое указывает контекст
@@ -63,7 +64,7 @@ class User extends Wrapper {
       messageToDelete.push(ctx.update.message.message_id--);
     }
     // Делаем массив запросов на удаление 
-    let promises = messageToDelete.map((messageId) => ctx.telegram.deleteMessage(ctx.from.id, messageId).catch(console.log));
+    let promises = messageToDelete.map(async (messageId) => await ctx.telegram.deleteMessage(ctx.from.id, messageId).catch((err) => console.log("Error", err.on)));
     // Дожидаемся когда все они будут завершены
     (await Promise.all(promises));
     this.free(ctx); //  Конец сложных запросов, можно разжать булки
@@ -76,18 +77,18 @@ class User extends Wrapper {
       postId || (posts && posts[show.indexWork] && posts[show.indexWork]._id) || -1;
     if (postId === -1) {
       ctx.reply("Здесь пока ничего нет", Markup.keyboard(["⬅ Назад"]).resize().extra());
-      ctx.session.show.responsedMessageCounter = 1;
+      show.responsedMessageCounter = 1;
       return 1;
     }
     const post = await ctx.base.getPost(postId);
     if (post === undefined) {
       ctx.reply("Пост удалён", Markup.keyboard(["⬅ Назад"]).resize().extra());
-      ctx.session.show.responsedMessageCounter = 1;
+      show.responsedMessageCounter = 1;
       return 1;
     }
     // Дополняем описание информацией об оценках
     let description = post.description || "";
-    let size = post.photos.length;
+    show.responsedMessageCounter = post.photos.length;
 
     await ctx.telegram.sendMediaGroup(
       ctx.from.id,
@@ -95,7 +96,7 @@ class User extends Wrapper {
     ).catch(async (err) => {
       console.log("Error", err.on);
       await ctx.reply("error");
-      size = 1;
+      show.responsedMessageCounter = 1;
     });
     
     // Заготавливаем комментарий к работе
@@ -107,10 +108,9 @@ class User extends Wrapper {
     
     // Отправляем комментарий
     await ctx.reply(msg, Markup.keyboard(["⬅ Назад"]).resize().extra());
-    size += 1; // Не забываем про то что каждое новое сообщение влияет на размер сцены
-
-    ctx.session.show.responsedMessageCounter = size;
-    return size;
+    show.responsedMessageCounter += 1; // Не забываем про то что каждое новое сообщение влияет на размер сцены\
+    
+    return show.responsedMessageCounter;
   }
 
   async sendPage(ctx, page) {
@@ -119,7 +119,7 @@ class User extends Wrapper {
       perPage = 4, // Сколько превью выводим на одну страницу
       show = ctx.session.show;
     //  Количество страниц
-    show.size = ((ctx.session.show.size + perPage - 1) / perPage) | 0;
+    show.size = ((show.size + perPage - 1) / perPage) | 0;
     page = (!page) ? (show.index = show.index % show.size) : (page % show.size);
     if ("" + show.index == "NaN") show.index = -1;
     //  Получение старницы с постами
@@ -138,7 +138,7 @@ class User extends Wrapper {
     // Если нет ничего нового
     if (works.length === 0) {
       show.responsedMessageCounter = 1;
-      ctx.reply(ctx.session.show.empty || "Пусто...", Markup.keyboard(["⬅ Назад"]).resize().extra());
+      ctx.reply(show.empty || "Пусто...", Markup.keyboard(["⬅ Назад"]).resize().extra());
       return 1;
     }
     //  Отправка превьюшек полльхователю
@@ -181,8 +181,9 @@ class User extends Wrapper {
         ["⏪ Предыдущая страница", "⏩ Следующая страница"],
         ["⬅ Назад"],
       ],
-        numButtons = ["1⃣", "2⃣", "3⃣", "4⃣"];
-      function photoRateButtonsGenerator(btnCount){
+        numButtons = ["1⃣", "2⃣", "3⃣", "4⃣"],
+        show = ctx.session.show;
+      function generateKeyboardPageNavigator(btnCount){
         let res = [];
         if (btnCount > 0 && btnCount < 5) {
           res = [[]];
@@ -202,12 +203,17 @@ class User extends Wrapper {
         res = res.concat(buttonsArray);
         return res;
       }
-      await ctx.reply(
-        "Нажмите на номер работы для " + (ctx.session.show.for || "просмотра"),
-        Markup.keyboard(photoRateButtonsGenerator(ctx.session.works.length)).resize().extra()
+      await this.reply(ctx,
+        "Нажмите на номер работы для " + (show.for || "просмотра"),
+        generateKeyboardPageNavigator(ctx.session.works.length)
       );
-      ctx.session.show.responsedMessageCounter += 1;
+      show.responsedMessageCounter += 1;
     }
+  }
+  async reply(ctx, msg, keyboard)
+  {
+    keyboard = keyboard && Markup.keyboard(keyboard).resize().extra();
+    return await ctx.reply(msg, keyboard);
   }
 
   //  Корневая сцена

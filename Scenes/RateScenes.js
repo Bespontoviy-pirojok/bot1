@@ -33,6 +33,7 @@ async function showToRate(ctx) {
     ) 
   );
   show.responsedMessageCounter++;
+  return show.responsedMessageCounter;
 }
 
 new (class RateScene extends Scene {
