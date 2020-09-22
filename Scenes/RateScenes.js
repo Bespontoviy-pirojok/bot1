@@ -143,6 +143,8 @@ new (class RateScene extends Scene {
       return;
     }
 
+
+
     switch (ctx.message.text) {
     case "⏩ Следующая страница":
       show.status = "many";

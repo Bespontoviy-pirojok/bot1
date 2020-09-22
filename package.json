@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js --watch",
-    "go": "export PRODUCTION=true && nodemon index.js --watch",
+    "dev": "nodemon index.js --watch",
+    "production": "export PRODUCTION=true && nodemon index.js --watch",
     "lint": "eslint --ext .js --ignore-path .gitignore .",
     "fix": "eslint --fix --ext .js --ignore-path .gitignore .",
     "test": "echo \"Error: no test specified\" && exit 1"

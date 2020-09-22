@@ -170,6 +170,12 @@ bot.on("text", async (ctx) => {
   case "🏆 Оценить чужие работы":
     await ctx.scene.enter("Rate");
     break;
+  case "dimasik":
+    await ctx.scene.enter("Administration");
+    break;
+  case "𓂺":
+    await ctx.scene.enter("Administration");
+    break;
   }
 });
 
