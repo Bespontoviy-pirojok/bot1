@@ -1,4 +1,7 @@
-const { Scene, Markup } = require("../Scenes");
+const { Scene, Markup } = require("./Scenes");
+
+require("./Administration/Reports");
+require("./Administration/UserProfile");
 
 new (class Administration extends Scene {
   constructor() {
@@ -30,7 +33,7 @@ new (class Administration extends Scene {
       ctx.reply("Ну тут типо должен быть список заблокированных пользователей");
       break;
     case "Назад":
-      await ctx.user.goMain();
+      await ctx.user.goMain(ctx);
       break;
     }
   }

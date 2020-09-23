@@ -1,6 +1,5 @@
 const { Scene, Markup } = require("../Scenes");
 
-
 new (class WriteMessageToUser extends Scene {
   constructor() {
     super("WriteMessageToUser");

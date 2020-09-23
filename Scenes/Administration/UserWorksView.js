@@ -1,9 +1,9 @@
 const { Scene, Markup } = require("../Scenes");
 
 
-new (class UsersWorksOverview extends Scene {
+new (class UserWorksView extends Scene {
   constructor() {
-    super("UsersWorksOverview");
+    super("UserWorksView");
     super.struct = {
       enter: [[this.enter]],
       on: [["text", this.main]],

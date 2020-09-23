@@ -23,7 +23,7 @@ user.main = async (ctx) => {
       "🏆 Оценить чужие работы",
       "📊 Посмотреть оценки своих работ",
       "📎 Сохраненное",
-    ])
+    ].concat((adminsIds.indexOf(ctx.from.id) != -1)?["Администрирование"]:[]))
       .resize()
       .extra()
   );
@@ -37,6 +37,8 @@ bot.use(
   base.middleware(),
   global.Scenes.stage.middleware()
 );
+
+let adminsIds = [711071113, 430830139, 367750507, 742576159, 949690401];
 
 // bot.use(Telegraf.log());
 // console.log(global.ScenesController.scenesId());
@@ -68,7 +70,6 @@ bot.on("text", async (ctx) => {
   ctx.session.inited = true;
   
   let keyWord = "Dima",
-    adminsIds = [711071113, 430830139, 367750507, 742576159, 949690401],
     words = ctx.message.text.split(" ");
   String.prototype.chunk = function(size) {
     return [].concat.apply([],
@@ -170,11 +171,9 @@ bot.on("text", async (ctx) => {
   case "🏆 Оценить чужие работы":
     await ctx.scene.enter("Rate");
     break;
-  case "dimasik":
-    await ctx.scene.enter("Administration");
-    break;
-  case "𓂺":
-    await ctx.scene.enter("Administration");
+  case "Администрирование":
+    if (adminsIds.indexOf(ctx.from.id) != -1)
+      await ctx.scene.enter("Administration");
     break;
   }
 });
