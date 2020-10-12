@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/interferstd/telegram-evaluating-designs#readme",
   "dependencies": {
+    "async-mutex": "^0.2.4",
     "eslint": "^7.2.0",
     "eslinter": "^3.2.1",
     "mongodb": "^3.5.9",
