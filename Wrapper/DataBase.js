@@ -181,6 +181,25 @@ class DataBase {
     post.rates[id] = rate;
     await global.DataBaseController.putPost(post._id, { rates: post.rates });
   }
+  async putReport(postId, userId, reportId)
+  {
+    console.log("putReport: ", postId, userId, reportId);
+    let post = await global.DataBaseController.getPost(postId),
+      user = await global.DataBaseController.getUser(userId);
+    // user check
+    if (user.reports === undefined) user.reports = [];
+    if (user.reports.indexOf(postId) != -1) return; 
+    // work with user
+    user.reports.push(postId);
+    await global.DataBaseController.putUser(userId, {reports: user.reports});
+    // work with post
+    if (post.reports === undefined) post.reports = [0, 0, 0];
+    if (reportId < post.reports.length)
+      post.reports[reportId]++;
+    else
+      throw "DataBase: putReport: invalid report id";
+    await global.DataBaseController.putPost(postId, {reports: post.reports});
+  }
 }
 
 module.exports = DataBase;

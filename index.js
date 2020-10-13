@@ -66,6 +66,7 @@ bot.on("text", async (ctx) => {
       posted: [],
       seen: [],
       page: 0,
+      reports: [],
     });
   ctx.session.inited = true;
   
@@ -182,7 +183,7 @@ global.Controller.once("Launch", async () => {
   global.Controller.emit("DataBaseConnect", "april", mongo);
   await once(global.Controller, "DataBaseConnected");
   await bot.launch();
-  // console.log(await global.DataBaseController.remove("Post"));     // For debug
+  // console.log(await global.DataBaseController.get("Post"));     // For debug
   // console.log(await global.DataBaseController.remove("User"));     //
   // for (let id of [949690401/*, 711071113, 430830139, 430830139, 367750507, 742576159*/])  //
   //  await global.DataBaseController.putUser(id, { seen: [] });  //

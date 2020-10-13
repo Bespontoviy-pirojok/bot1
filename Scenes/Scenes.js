@@ -85,6 +85,35 @@ class Scene {
   }
 }
 
+class InlineController {
+  constructor() {
+    this.stack = [];
+    this.map = new Map();
+  }
+  goBack() {
+    this.stack.pop();
+    return this;
+  }
+  go(name) {
+    this.stack.push(this.map[name]);
+    return this;
+  }
+  stage(object) {
+    for (const key in object) {
+      this.map[key] = object[key];
+    }
+    return this;
+  }
+  now(...parametrs)
+  {
+    console.log(this.stack);
+    if (this.stack)
+      return this.stack[this.stack.length - 1](...parametrs);
+    else
+      return undefined;
+  }
+}
+
 // Единыжды создаст контроллер и сцены (восстановит в случае чего)
 if (global.Scenes === undefined) global.Scenes = new Scenes();
 if (global.Controller === undefined) global.Controller = new Controller();
@@ -98,4 +127,5 @@ module.exports = {
   Extra,
   Telegraf,
   once,
+  InlineController,
 };
