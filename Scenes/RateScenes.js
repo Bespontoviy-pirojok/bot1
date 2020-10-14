@@ -2,8 +2,6 @@
 // TODO: Изменилась переменная индекса работы проверить
 const { Scene, Markup, Extra, InlineController } = require("./Scenes");
 
-const { ObjectID } = require("mongodb");
-
 async function findSavedStatus(ctx, userId, postId)
 {
   let user = await ctx.base.getUser(userId);
@@ -25,15 +23,13 @@ function inlineRate(show, postId) {
         String(i + 1) + "-" + postId
       )
     ),
-    [
-      Markup.callbackButton((show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу", "save-" + postId),
-      Markup.callbackButton((show.rated_status) ? "Жалоба уже отправлена": "Пожаловаться", "report-" + postId)
-    ],
+    [Markup.callbackButton((show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу", "save-" + postId)],
+    [Markup.callbackButton(...(show.rated_status) ? ["Жалоба уже отправлена","nop"]: ["Пожаловаться", "report-" + postId])],
   ];
 }
 
 function inlineReport(show, postId) {
-  const reportType = ["Плагиат", "Спам", "Неприличный контент"];
+  const reportType = ["Неприличный контент", "Плагиат", "Спам"];
   let board = [...Array(3).keys()].map((i) =>
     [Markup.callbackButton(
       reportType[i],
@@ -71,6 +67,7 @@ new (class RateScene extends Scene {
         [/([1-3])report-([\w\D]*)/, this.reportPost],
         [/report-([\w\D]*)/, this.goReports],
         [/back-([\w\D]*)/, this.goBack],
+        [/nop/, this.nop],
       ],
       on: [["text", this.main]],
     };
@@ -142,6 +139,7 @@ new (class RateScene extends Scene {
     } 
     show.report_status = true;
     await ctx.base.putReport(postId, ctx.from.id, reportId);
+    await ctx.base.seenPost(ctx.from.id, postId);
     await ctx.editMessageReplyMarkup({
       inline_keyboard: ctx.session.inlineKeyboard.goBack().now(show, postId)
     }).catch(); // если не нечего менять, оно выкенет ошибку // TODO: сделать отельную функцию
@@ -153,6 +151,10 @@ new (class RateScene extends Scene {
     await ctx.editMessageReplyMarkup({
       inline_keyboard: ctx.session.inlineKeyboard.goBack().now(ctx.session.show, postId)
     });
+    await ctx.answerCbQuery();
+  }
+  
+  async nop(ctx) {
     await ctx.answerCbQuery();
   }
 
