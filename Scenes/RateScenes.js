@@ -36,7 +36,7 @@ function inlineReport(show, postId) {
       String(i + 1) + "report-" + postId
     )]
   );
-  board.push([Markup.callbackButton("⬅️Отмена", "back-" + postId)]);
+  // board.push([Markup.callbackButton("⬅️Отмена", "back-" + postId)]);
   return board;
 }
 
@@ -126,6 +126,7 @@ new (class RateScene extends Scene {
     await ctx.editMessageReplyMarkup({
       inline_keyboard: ctx.session.inlineKeyboard.go("Report").now(ctx.session.show, postId)
     });
+    ctx.session.show.status = "warn";
     await ctx.answerCbQuery();
   }
 
@@ -192,18 +193,24 @@ new (class RateScene extends Scene {
       await user.updateWith(user.shiftIndex(ctx, -1), user.sendWorksGroup);
       break;
     case "⬅ Назад":
-      if (show.status === "many")
-      {
+      switch (show.status) {
+      case "many":
         show.status = undefined;
         ctx.session.inlineKeyboard = undefined;
         await ctx.base.putUser(ctx.from.id, { page: show.index });
-        await ctx.user.goMain(ctx);
-      } else {
+        await ctx.user.goMain(ctx);  
+        break;
+      case "one":
         show.status = "many";
         show.saved_status = undefined;
         show.rated_status = undefined;
         show.report_status = undefined;
         await user.updateWith(ctx, user.sendWorksGroup);
+        break;
+      case "warn":
+        show.status = "one";
+        this.goBack();
+        break;
       }
       break;
     default:
