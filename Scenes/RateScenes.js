@@ -24,7 +24,7 @@ function inlineRate(show, postId) {
       )
     ),
     [Markup.callbackButton((show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу", "save-" + postId)],
-    [Markup.callbackButton(...(show.report_status) ? ["❌Жалоба отправлена","nop"]: ["❌Пожаловаться", "report-" + postId])],
+    [Markup.callbackButton(...(show.report_status) ? ["🚫 Жалоба отправлена","nop"]: ["🚫 Пожаловаться", "report-" + postId])],
   ];
 }
 
@@ -36,7 +36,7 @@ function inlineReport(show, postId) {
       String(i + 1) + "report-" + postId
     )]
   );
-  // board.push([Markup.callbackButton("⬅️Отмена", "back-" + postId)]);
+  // board.push([Markup.callbackButton("❌ Отмена", "back-" + postId)]);
   return board;
 }
 
