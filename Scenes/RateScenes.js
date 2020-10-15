@@ -24,7 +24,7 @@ function inlineRate(show, postId) {
       )
     ),
     [Markup.callbackButton((show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу", "save-" + postId)],
-    [Markup.callbackButton(...(show.report_status) ? ["🚫 Жалоба отправлена","nop"]: ["🚫 Пожаловаться", "report-" + postId])],
+    [Markup.callbackButton(...(show.report_status) ? ["✅ Жалоба отправлена","nop"]: ["🚫 Пожаловаться", "report-" + postId])],
   ];
 }
 
