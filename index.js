@@ -1,7 +1,7 @@
 // @mamkin_designer_bot
 // https://www.mindmeister.com/ru/1522778260?t=8C07mVgoEn
 
-const { token, devToken, mongo } = require("./congif.json");
+const { token, devToken, dbName, dbNameDev, mongo } = require("./congif.json");
 
 const { Telegraf, Markup, session, once } = require("./Scenes");
 const exec = require("child_process").exec;
@@ -9,6 +9,7 @@ const fs = require("fs");
 
 // Роутер бота
 const bot = new Telegraf(process.env.PRODUCTION? token: devToken);
+const nameDataBase = process.env.PRODUCTION? dbName: dbNameDev;
 
 // Обработка обращений к базе данных
 const base = require("./Wrapper/DataBase").get();
@@ -180,7 +181,7 @@ bot.on("text", async (ctx) => {
 });
 
 global.Controller.once("Launch", async () => {
-  global.Controller.emit("DataBaseConnect", "april", mongo);
+  global.Controller.emit("DataBaseConnect", nameDataBase, mongo);
   await once(global.Controller, "DataBaseConnected");
   await bot.launch();
   // console.log(await global.DataBaseController.get("Post"));     // For debug
