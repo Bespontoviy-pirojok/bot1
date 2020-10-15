@@ -24,7 +24,7 @@ function inlineRate(show, postId) {
       )
     ),
     [Markup.callbackButton((show.saved_status) ? "🤘 Сохранено": "📎 Сохранить работу", "save-" + postId)],
-    [Markup.callbackButton(...(show.rated_status) ? ["Жалоба уже отправлена","nop"]: ["❌Пожаловаться", "report-" + postId])],
+    [Markup.callbackButton(...(show.report_status) ? ["❌Жалоба отправлена","nop"]: ["❌Пожаловаться", "report-" + postId])],
   ];
 }
 
@@ -47,7 +47,7 @@ async function showToRate(ctx) {
     rate = await ctx.base.getRate(postId);
   show.responsedMessageCounter = await user.sendWork(ctx);
   await ctx.reply(
-    (rate ? "Средняя оценка работы: " + rate + "\nОцените работу:" : "Работу ещё никто не оценил, станьте первым!"),
+    (rate ? "Средняя оценка работы: " + rate.toFixed(2) + "\nОцените работу:" : "Работу ещё никто не оценил, станьте первым!"),
     Extra.HTML().markup((m) =>
       m.inlineKeyboard(inlineRate(show, postId))
     ) 
