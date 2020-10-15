@@ -72,17 +72,18 @@ class User extends Wrapper {
   //  Отправка работ
   async sendWork(ctx, postId) {
     const show = ctx.session.show,
-      posts = show.array;
+      posts = show.array,
+      keyboard = Markup.keyboard(show.keyboard || ["⬅ Назад"]).resize().extra();
     postId =
       postId || (posts && posts[show.indexWork] && posts[show.indexWork]._id) || -1;
     if (postId === -1) {
-      ctx.reply("Здесь пока ничего нет", Markup.keyboard(["⬅ Назад"]).resize().extra());
+      ctx.reply("Здесь пока ничего нет", keyboard);
       show.responsedMessageCounter = 1;
       return 1;
     }
     const post = await ctx.base.getPost(postId);
     if (post === undefined) {
-      ctx.reply("Пост удалён", Markup.keyboard(["⬅ Назад"]).resize().extra());
+      ctx.reply("Пост удалён", keyboard);
       show.responsedMessageCounter = 1;
       return 1;
     }
@@ -107,7 +108,7 @@ class User extends Wrapper {
     }
     
     // Отправляем комментарий
-    await ctx.reply(msg, Markup.keyboard(["⬅ Назад"]).resize().extra());
+    await ctx.reply(msg, keyboard);
     show.responsedMessageCounter += 1; // Не забываем про то что каждое новое сообщение влияет на размер сцены\
     
     return show.responsedMessageCounter;
@@ -178,31 +179,31 @@ class User extends Wrapper {
     if (ctx.session.works && ctx.session.works.length !== 0 && ctx.session.show.index !== -1)
     {
       var buttonsArray = [
-        ["⏪ Предыдущая страница", "⏩ Следующая страница"],
-        ["⬅ Назад"],
-      ],
+          ["⏪ Предыдущая страница", "⏩ Следующая страница"],
+          ["⬅ Назад"],
+        ],
         numButtons = ["1⃣", "2⃣", "3⃣", "4⃣"],
-        show = ctx.session.show;
-      function generateKeyboardPageNavigator(btnCount){
-        let res = [];
-        if (btnCount > 0 && btnCount < 5) {
-          res = [[]];
-          for (let i = 1; i <= btnCount; ++i) {
-            res[0].push(numButtons[i-1]);
+        show = ctx.session.show,
+        generateKeyboardPageNavigator = function (btnCount){
+          let res = [];
+          if (btnCount > 0 && btnCount < 5) {
+            res = [[]];
+            for (let i = 1; i <= btnCount; ++i) {
+              res[0].push(numButtons[i-1]);
+            }
+          } else if (btnCount > 0 && btnCount <= 8) {
+            res = [[], []];
+            const separator = ((btnCount+1) / 2) | 0;
+            for (let i = 1; i <= separator; ++i) {
+              res[0].push(numButtons[i-1]);
+            }
+            for (let i = separator + 1; i <= btnCount; ++i) {
+              res[1].push(numButtons[i-1]);
+            }
           }
-        } else if (btnCount > 0 && btnCount <= 8) {
-          res = [[], []];
-          const separator = ((btnCount+1) / 2) | 0;
-          for (let i = 1; i <= separator; ++i) {
-            res[0].push(numButtons[i-1]);
-          }
-          for (let i = separator + 1; i <= btnCount; ++i) {
-            res[1].push(numButtons[i-1]);
-          }
-        }
-        res = res.concat(buttonsArray);
-        return res;
-      }
+          res = res.concat(buttonsArray);
+          return res;
+        };
       await this.reply(ctx,
         "Нажмите на номер работы для " + (show.for || "просмотра"),
         generateKeyboardPageNavigator(ctx.session.works.length)

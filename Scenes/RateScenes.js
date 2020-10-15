@@ -36,7 +36,7 @@ function inlineReport(show, postId) {
       String(i + 1) + "report-" + postId
     )]
   );
-  // board.push([Markup.callbackButton("❌ Отмена", "back-" + postId)]);
+  board.push([Markup.callbackButton("❌ Отмена", "back-" + postId)]);
   return board;
 }
 
@@ -50,7 +50,7 @@ async function showToRate(ctx) {
     (rate ? "Средняя оценка работы: " + rate.toFixed(2) + "\nОцените работу:" : "Работу ещё никто не оценил, станьте первым!"),
     Extra.HTML().markup((m) =>
       m.inlineKeyboard(inlineRate(show, postId))
-    ) 
+    )
   );
   show.responsedMessageCounter++;
   return show.responsedMessageCounter;
@@ -82,6 +82,7 @@ new (class RateScene extends Scene {
       index: user.page,
       status: "many",
       for: "оценки",
+      keyboard: ["⬅ Назад в ленту"],
     });
     if (show.index == -1) show.index = 0;
     show.responsedMessageCounter = await ctx.user.sendWorksGroup(ctx);
@@ -126,7 +127,6 @@ new (class RateScene extends Scene {
     await ctx.editMessageReplyMarkup({
       inline_keyboard: ctx.session.inlineKeyboard.go("Report").now(ctx.session.show, postId)
     });
-    ctx.session.show.status = "warn";
     await ctx.answerCbQuery();
   }
 
@@ -196,6 +196,7 @@ new (class RateScene extends Scene {
       switch (show.status) {
       case "many":
         show.status = undefined;
+        show.keyboard = undefined;
         ctx.session.inlineKeyboard = undefined;
         await ctx.base.putUser(ctx.from.id, { page: show.index });
         await ctx.user.goMain(ctx);  
@@ -207,11 +208,14 @@ new (class RateScene extends Scene {
         show.report_status = undefined;
         await user.updateWith(ctx, user.sendWorksGroup);
         break;
-      case "warn":
-        show.status = "one";
-        this.goBack();
-        break;
       }
+      break;
+    case "⬅ Назад в ленту":
+      show.status = "many";
+      show.saved_status = undefined;
+      show.rated_status = undefined;
+      show.report_status = undefined;
+      await user.updateWith(ctx, user.sendWorksGroup);
       break;
     default:
       show.responsedMessageCounter++;
